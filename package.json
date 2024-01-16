@@ -1,0 +1,28 @@
+{
+  "name": "cloudinary_service",
+  "version": "1.0.0",
+  "description": "Work with cloudinary to edit image or video.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/laeroah/cloudinary_service.git"
+  },
+  "author": "Hao Wang",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/laeroah/cloudinary_service/issues"
+  },
+  "homepage": "https://github.com/laeroah/cloudinary_service#readme",
+  "dependencies": {
+    "@google-cloud/storage": "^7.7.0",
+    "@google-cloud/text-to-speech": "^5.0.1",
+    "cloudinary": "^1.41.2",
+    "express": "^4.18.2",
+    "fs": "^0.0.1-security",
+    "util": "^0.12.5",
+    "xml2json": "^0.12.0"
+  }
+}
