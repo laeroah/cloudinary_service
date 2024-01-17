@@ -3,8 +3,11 @@ const fs = require('fs');
 // const { app, downloadImage, uploadImage } = require('./shared');
 const voiceSynthesizerRouter = require('./voice_synthesizer');
 const videoSynthesizerRouter = require('./video_synthesizer');
+const credential = require('./application_default_credentials');
 
 // const { comfyuiServerUrl, comfyuiHistoryUrl } = require('./constants');
+
+console.log("credential: " + JSON.stringify(credential));
 
 const app = express();
 const port = process.env.PORT || 8080;
