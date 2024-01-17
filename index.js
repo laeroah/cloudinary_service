@@ -22,8 +22,9 @@ async function main() {
   const res = await client.request({url});
   console.log(res.data);
   console.log("credentials: " + JSON.stringify(auth.credentials));
-  speechClient.listVoices({languageCode: 'en'});
-  const [result] = await speechClient.listVoices({languageCode});
+
+  const languageCode = 'en';
+  const [result] = await client.listVoices({languageCode});
   const voices = result.voices;
 
   voices.forEach((voice) => {
