@@ -7,22 +7,20 @@ const videoSynthesizerRouter = require('./video_synthesizer');
 
 // const { comfyuiServerUrl, comfyuiHistoryUrl } = require('./constants');
 
-// const {auth, Compute} = require('google-auth-library');
+const {GoogleAuth} = require('google-auth-library');
 
-// async function main() {
-//   const client = new Compute({
-//     // Specifying the service account email is optional.
-//     serviceAccountEmail:
-//         'aishorts-prototyping@deepstream-experiments.iam.gserviceaccount.com'
-//   });
-//   const projectId = await auth.getProjectId();
-//   console.log("projectId: " + projectId);
-//   const url = `https://dns.googleapis.com/dns/v1/projects/${projectId}`;
-//   const res = await client.request({url});
-//   console.log(res.data);
-// }
+async function main() {
+  const auth = new GoogleAuth(
+      {scopes: 'https://www.googleapis.com/auth/cloud-platform'});
+  const client = await auth.getClient();
+  const projectId = await auth.getProjectId();
+  const url =
+      `https://texttospeech.googleapis.com/v1/voices`;
+  const res = await client.request({url});
+  console.log(res.data);
+}
 
-// main().catch(console.error);
+main().catch(console.error);
 
 const app = express();
 // app.use(
