@@ -9,18 +9,6 @@ var xmlToJsonParser = require('xml2json');
 // const {sample_story_ssml, sample_time_points} = require('./constants');
 
 const router = express.Router();
-
-// const getApiKeyCredentials = () => {
-//   const sslCreds = grpc.credentials.createSsl();
-//   const googleAuth = new GoogleAuth();
-//   const authClient =
-//       googleAuth.fromAPIKey('AIzaSyDXN-oliEQNG3MO80QgamgALxepKtl86JQ');
-//   const credentials = grpc.credentials.combineChannelCredentials(
-//       sslCreds, grpc.credentials.createFromGoogleCredential(authClient));
-//   return credentials;
-// };
-
-// const sslCreds = getApiKeyCredentials();
 // Creates a client
 const client = new textToSpeech.v1beta1.TextToSpeechClient();
 

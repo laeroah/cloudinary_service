@@ -17,6 +17,9 @@ const imagePublicIds = [
 ];
 const tag = 'sample-story-video';
 
+const imageHeight = 904;
+const imageWidth = 512;
+
 // Sample story data
 const sampleStoryName = 'sample_story_1'
 const imagePublicIds_sample_story = [
@@ -86,8 +89,8 @@ const applyAnimationToImages = (imagePublicIds, animate_durations) => {
 };
 
 const concatVideos = (videoPublicIds) => {
-  const videoHeight = 400;
-  const videoWidth = 400;
+  const videoHeight = imageHeight;
+  const videoWidth = imageWidth;
   const totalVideoCount = videoPublicIds.length;
   var transformation = [{height: videoHeight, width: videoWidth, crop: 'fill'}];
   for (let i = 1; i < totalVideoCount; i++) {
@@ -218,7 +221,7 @@ router.use('/apply_zoom_pan_images', async (req, res, next) => {
             resource_type: 'image',
             transformation: [
               {effect: `zoompan:du_${du};to_(g_auto)`},
-              {width: 400, crop: 'scale'}, {quality: 'auto'}
+              {width: imageWidth, crop: 'scale'}, {quality: 'auto'}
             ]
           });
           console.log(
@@ -235,8 +238,8 @@ router.use('/apply_zoom_pan_images', async (req, res, next) => {
 router.use('/concat_videos', async (req, res, next) => {
   if (req.method === 'POST') {
     const storyName = req.body.story_name;
-    const videoHeight = 400;
-    const videoWidth = 400;
+    const videoHeight = imageHeight;
+    const videoWidth = imageWidth;
     const totalVideoCount = imagePublicIds_sample_story.length;
     var transformation =
         [{height: videoHeight, width: videoWidth, crop: 'fill'}];
