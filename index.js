@@ -10,15 +10,13 @@ const videoSynthesizerRouter = require('./video_synthesizer');
 const {auth, Compute} = require('google-auth-library');
 
 async function main() {
-  const client = new Compute({
-    // Specifying the service account email is optional.
-    serviceAccountEmail:
-        'aishorts-prototyping@deepstream-experiments.iam.gserviceaccount.com'
+  const auth = new GoogleAuth({
+    scopes: 'https://www.googleapis.com/auth/cloud-platform'
   });
+  const client = await auth.getClient();
   const projectId = await auth.getProjectId();
-  console.log("projectId: " + projectId);
   const url = `https://dns.googleapis.com/dns/v1/projects/${projectId}`;
-  const res = await client.request({url});
+  const res = await client.request({ url });
   console.log(res.data);
 }
 
