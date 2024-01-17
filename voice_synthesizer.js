@@ -59,7 +59,6 @@ const generateSRT = (srtFileName, ssmlStr, timePoints) => {
   for (const [index, mark] of ssml.speak.mark.entries()) {
     subtitleFile.write(index + 1 + '\n');
     text = mark.text;
-    console.log('text: ' + text);
     markName = mark.name;
     timeSeconds = timePoints[index]['timeSeconds'];
     nextTimeSeconds = index < timePoints.length - 1 ?
@@ -82,35 +81,6 @@ const generateSRT = (srtFileName, ssmlStr, timePoints) => {
   subtitleFile.end();
   return paragraphDurations;
 };
-
-// Sample call: curl -X POST -H "Content-Type: application/json" --data
-// '{"ssml": "hello world!"}'
-// http://0.0.0.0:8080/synthesize_voice
-// router.use('/synthesize_voice', async (req, res, next) => {
-//   if (req.method === 'POST') {
-//     const filename = Date.now() + '.mp3';  // Generate a unique filename
-//     if (req.body.ssml) {
-//       const ssml = req.body.ssml;
-//       synthesizeVoice(ssml, filename)
-//           .then((audioFileName, timepoints) => {
-//             // saveToCloudStorage(audioFileName, audioFileName);
-//             res.status(201).send({
-//               message: 'Voice synthesized successfully!',
-//               filename,
-//               downloadUrl: url
-//             });
-//           })
-//           .catch((error) => {
-//             console.error('Error synthesize voice:', error);
-//             res.status(500).send('Error synthesize voice');
-//           });
-//     } else {
-//       return res.status(400).send({message: 'Missing input text.'});
-//     }
-//   } else {
-//     next();
-//   }
-// });
 
 const generateSSML = (paragraphs) => {
   let output = '<speak>';
