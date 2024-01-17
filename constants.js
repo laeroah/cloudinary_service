@@ -1,82 +1,57 @@
-const sample_story_ssml =
-`
-<speak>
-<mark name="1" text="Did you know"/>Did you know <mark name="2" text="that the very first"/>that the very first <mark name="3" text="Google Doodle"/>Google Doodle
-<mark name="4" text="wasn't a planned"/>wasn't a planned <mark name="5" text="celebration, but"/>celebration, but <mark name="6" text="a mischievous cry"/>a mischievous cry
-<mark name="7" text="for help? Back in"/>for help? Back in <mark name="8" text="1998, founders"/>1998, founders <mark name="9" text="Larry Page and"/>Larry Page and
-<mark name="10" text="Sergey Brin were"/>Sergey Brin were <mark name="11" text="heading out to"/>heading out to <mark name="12" text="Burning Man, the"/>Burning Man, the
-<mark name="13" text="wild and wacky"/>wild and wacky <mark name="14" text="festival in the"/>festival in the <mark name="15" text="Black Rock Desert."/>Black Rock Desert.
-<mark name="16" text="They wanted to"/>They wanted to <mark name="17" text="let users know"/>let users know <mark name="18" text="they were out"/>they were out
-<mark name="19" text="of office, but"/>of office, but <mark name="20" text="with a typical"/>with a typical <mark name="21" text="Google twist. So,"/>Google twist. So,
-<mark name="22" text="they plopped a"/>they plopped a <mark name="23" text="stick figure"/>stick figure <mark name="24" text="drawing of a"/>drawing of a
-<mark name="25" text="burning man"/>burning man <mark name="26" text="behind the Google"/>behind the Google <mark name="27" text="logo. It was"/>logo. It was
-<mark name="28" text="meant to be a"/>meant to be a <mark name="29" text="quick and silly"/>quick and silly <mark name="30" text="thing, but it"/>thing, but it
-<mark name="31" text="ended up sparking"/>ended up sparking <mark name="32" text="a tradition that"/>a tradition that <mark name="33" text="now sees Doodles"/>now sees Doodles
-<mark name="34" text="grace the homepage"/>grace the homepage <mark name="35" text="for everything from"/>for everything from <mark name="36" text="major holidays"/>major holidays
-<mark name="37" text="to obscure historical"/>to obscure historical <mark name="38" text="figures. Who knew"/>figures. Who knew <mark name="39" text="a little Burning"/>a little Burning
-<mark name="40" text="Man burner could"/>Man burner could <mark name="41" text="ignite such a"/>ignite such a <mark name="42" text="creative firestorm?"/>creative firestorm?
-<mark name="43" text="So next time you"/>So next time you <mark name="44" text="see a Doodle,"/>see a Doodle, <mark name="45" text="remember its humble"/>remember its humble
-<mark name="46" text="beginnings: a playful"/>beginnings: a playful <mark name="47" text="wink from the"/>wink from the <mark name="48" text="Google founders,"/>Google founders,
-<mark name="49" text="reminding us that"/>reminding us that <mark name="50" text="even the biggest tech giants"/>even the biggest tech giants even the biggest tech giants <mark name="51" text="can have a bit of fun."/>can have a bit of fun.
-</speak>
+const sample_story_ssml = `
+<speak><mark name="1" text="Did you know that"/>Did you know that<mark name="2" text="The Great Emu War"/>The Great Emu War<mark name="3" text="took place in Australia"/>took place in Australia<mark name="4" text="in 1932? In the"/>in 1932? In the<mark name="5" text="rugged plains of Western"/>rugged plains of Western<mark name="6" text="Australia, soldiers clad in"/>Australia, soldiers clad in<mark name="7" text="military uniforms gathered their"/>military uniforms gathered their<mark name="8" text="weapons. Standing before them"/>weapons. Standing before them<mark name="9" text="were thousands of emus,"/>were thousands of emus,<mark name="10" text="large flightless birds with"/>large flightless birds with<mark name="11" text="feathers as brown as"/>feathers as brown as<mark name="12" text="the earth itself. The"/>the earth itself. The<mark name="13" text="emus moved cautiously, their"/>emus moved cautiously, their<mark name="14" text="large feet creating imprints"/>large feet creating imprints<mark name="15" text="in the dusty ground"/>in the dusty ground<mark name="16" text="as they approached the"/>as they approached the<mark name="17" text="army's position. With a"/>army's position. With a<mark name="18" text="commanding order, the soldiers"/>commanding order, the soldiers<mark name="19" text="unleashed a barrage of"/>unleashed a barrage of<mark name="20" text="bullets, aiming to quell"/>bullets, aiming to quell<mark name="21" text="the emu invasion. But"/>the emu invasion. But<mark name="22" text="the emus, nimble and"/>the emus, nimble and<mark name="23" text="quick, scattered in all"/>quick, scattered in all<mark name="24" text="directions, evading the soldiers'"/>directions, evading the soldiers'<mark name="25" text="onslaught. Undeterred, the army"/>onslaught. Undeterred, the army<mark name="26" text="persisted, launching a relentless"/>persisted, launching a relentless<mark name="27" text="assault in an attempt"/>assault in an attempt<mark name="28" text="to turn the tide."/>to turn the tide.<mark name="29" text="However, despite their efforts,"/>However, despite their efforts,<mark name="30" text="the emus proved to"/>the emus proved to<mark name="31" text="be formidable adversaries, their"/>be formidable adversaries, their<mark name="32" text="numbers seemingly endless. Ultimately,"/>numbers seemingly endless. Ultimately,<mark name="33" text="a decision was made"/>a decision was made<mark name="34" text="to withdraw the troops,"/>to withdraw the troops,<mark name="35" text="and the emus claimed"/>and the emus claimed<mark name="36" text="victory in what became"/>victory in what became<mark name="37" text="known as the Great"/>known as the Great</speak>
 `;
 
-const sample_time_points =
-[
-  { timeSeconds: 0.08739781379699707, markName: '1' },
-  { timeSeconds: 0.6049315333366394, markName: '2' },
-  { timeSeconds: 1.482468843460083, markName: '3' },
-  { timeSeconds: 2.140768051147461, markName: '4' },
-  { timeSeconds: 2.799055337905884, markName: '5' },
-  { timeSeconds: 3.8285257816314697, markName: '6' },
-  { timeSeconds: 4.686862945556641, markName: '7' },
-  { timeSeconds: 6.372307300567627, markName: '8' },
-  { timeSeconds: 8.068525314331055, markName: '9' },
-  { timeSeconds: 8.879302978515625, markName: '10' },
-  { timeSeconds: 9.68212890625, markName: '11' },
-  { timeSeconds: 10.261804580688477, markName: '12' },
-  { timeSeconds: 11.179749488830566, markName: '13' },
-  { timeSeconds: 12.027859687805176, markName: '14' },
-  { timeSeconds: 12.755973815917969, markName: '15' },
-  { timeSeconds: 14.510027885437012, markName: '16' },
-  { timeSeconds: 15.112460136413574, markName: '17' },
-  { timeSeconds: 15.89113998413086, markName: '18' },
-  { timeSeconds: 16.373340606689453, markName: '19' },
-  { timeSeconds: 17.247873306274414, markName: '20' },
-  { timeSeconds: 17.88194465637207, markName: '21' },
-  { timeSeconds: 20.341156005859375, markName: '22' },
-  { timeSeconds: 20.90367889404297, markName: '23' },
-  { timeSeconds: 21.536895751953125, markName: '24' },
-  { timeSeconds: 22.040050506591797, markName: '25' },
-  { timeSeconds: 22.68703842163086, markName: '26' },
-  { timeSeconds: 23.446189880371094, markName: '27' },
-  { timeSeconds: 25.037189483642578, markName: '28' },
-  { timeSeconds: 25.604324340820312, markName: '29' },
-  { timeSeconds: 26.309467315673828, markName: '30' },
-  { timeSeconds: 27.190603256225586, markName: '31' },
-  { timeSeconds: 28.079612731933594, markName: '32' },
-  { timeSeconds: 28.744924545288086, markName: '33' },
-  { timeSeconds: 29.727890014648438, markName: '34' },
-  { timeSeconds: 30.665006637573242, markName: '35' },
-  { timeSeconds: 31.433292388916016, markName: '36' },
-  { timeSeconds: 32.29425811767578, markName: '37' },
-  { timeSeconds: 33.42818832397461, markName: '38' },
-  { timeSeconds: 35.255985260009766, markName: '39' },
-  { timeSeconds: 36.00446701049805, markName: '40' },
-  { timeSeconds: 36.753501892089844, markName: '41' },
-  { timeSeconds: 37.48116683959961, markName: '42' },
-  { timeSeconds: 39.53437805175781, markName: '43' },
-  { timeSeconds: 40.48606491088867, markName: '44' },
-  { timeSeconds: 41.479732513427734, markName: '45' },
-  { timeSeconds: 42.35875701904297, markName: '46' },
-  { timeSeconds: 43.7050666809082, markName: '47' },
-  { timeSeconds: 44.26942443847656, markName: '48' },
-  { timeSeconds: 45.28046798706055, markName: '49' },
-  { timeSeconds: 46.038490295410156, markName: '50' },
-  { timeSeconds: 48.648101806640625, markName: '51' }
+const animate_durations = [9.6, 8.3, 7.2, 6.1, 7.3, 4.6, 8.1, 8.1];
+
+const sample_time_points = [
+  {timeSeconds: 0.08642254769802094, markName: '1'},
+  {timeSeconds: 0.7549177408218384, markName: '2'},
+  {timeSeconds: 1.73957359790802, markName: '3'},
+  {timeSeconds: 2.9644505977630615, markName: '4'},
+  {timeSeconds: 5.240354537963867, markName: '5'},
+  {timeSeconds: 6.385107040405273, markName: '6'},
+  {timeSeconds: 8.11279296875, markName: '7'},
+  {timeSeconds: 9.618419647216797, markName: '8'},
+  {timeSeconds: 12.212960243225098, markName: '9'},
+  {timeSeconds: 13.652225494384766, markName: '10'},
+  {timeSeconds: 14.988801956176758, markName: '11'},
+  {timeSeconds: 16.010141372680664, markName: '12'},
+  {timeSeconds: 17.984981536865234, markName: '13'},
+  {timeSeconds: 19.73822021484375, markName: '14'},
+  {timeSeconds: 21.388980865478516, markName: '15'},
+  {timeSeconds: 22.34579086303711, markName: '16'},
+  {timeSeconds: 23.15926742553711, markName: '17'},
+  {timeSeconds: 25.11285972595215, markName: '18'},
+  {timeSeconds: 26.808195114135742, markName: '19'},
+  {timeSeconds: 27.848831176757812, markName: '20'},
+  {timeSeconds: 29.13654327392578, markName: '21'},
+  {timeSeconds: 31.233062744140625, markName: '22'},
+  {timeSeconds: 32.645416259765625, markName: '23'},
+  {timeSeconds: 33.91246795654297, markName: '24'},
+  {timeSeconds: 35.75883483886719, markName: '25'},
+  {timeSeconds: 38.566795349121094, markName: '26'},
+  {timeSeconds: 40.40128707885742, markName: '27'},
+  {timeSeconds: 41.41554260253906, markName: '28'},
+  {timeSeconds: 43.13718795776367, markName: '29'},
+  {timeSeconds: 45.17160415649414, markName: '30'},
+  {timeSeconds: 46.14360809326172, markName: '31'},
+  {timeSeconds: 47.78759765625, markName: '32'},
+  {timeSeconds: 51.082698822021484, markName: '33'},
+  {timeSeconds: 52.03341293334961, markName: '34'},
+  {timeSeconds: 53.313079833984375, markName: '35'},
+  {timeSeconds: 54.28957748413086, markName: '36'},
+  {timeSeconds: 55.329681396484375, markName: '37'}
 ];
+
+cloudinary_config = {
+  cloud_name: 'dgxcndjdr',
+  api_key: '697581946523117',
+  api_secret: '09czU54XnUfCElaxhTNg7LOnEkQ'
+};
 
 module.exports = {
   sample_story_ssml,
+  animate_durations,
   sample_time_points
 };
