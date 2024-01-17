@@ -1,6 +1,6 @@
 const express = require('express');
 const textToSpeech = require('@google-cloud/text-to-speech');
-const {GoogleAuth, grpc} = require('google-gax');
+// const {GoogleAuth, grpc} = require('google-gax');
 const fs = require('fs');
 const util = require('util');
 // const {saveToCloudStorage} = require('./gcs');
@@ -10,19 +10,19 @@ var xmlToJsonParser = require('xml2json');
 
 const router = express.Router();
 
-const getApiKeyCredentials = () => {
-  const sslCreds = grpc.credentials.createSsl();
-  const googleAuth = new GoogleAuth();
-  const authClient =
-      googleAuth.fromAPIKey('AIzaSyDXN-oliEQNG3MO80QgamgALxepKtl86JQ');
-  const credentials = grpc.credentials.combineChannelCredentials(
-      sslCreds, grpc.credentials.createFromGoogleCredential(authClient));
-  return credentials;
-};
+// const getApiKeyCredentials = () => {
+//   const sslCreds = grpc.credentials.createSsl();
+//   const googleAuth = new GoogleAuth();
+//   const authClient =
+//       googleAuth.fromAPIKey('AIzaSyDXN-oliEQNG3MO80QgamgALxepKtl86JQ');
+//   const credentials = grpc.credentials.combineChannelCredentials(
+//       sslCreds, grpc.credentials.createFromGoogleCredential(authClient));
+//   return credentials;
+// };
 
-const sslCreds = getApiKeyCredentials();
+// const sslCreds = getApiKeyCredentials();
 // Creates a client
-const client = new textToSpeech.v1beta1.TextToSpeechClient({sslCreds});
+const client = new textToSpeech.v1beta1.TextToSpeechClient();
 
 const synthesizeVoice = async (ssml_text, audioFileName) => {
   // Construct the request
