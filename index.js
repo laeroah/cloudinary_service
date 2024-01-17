@@ -3,6 +3,8 @@ const fs = require('fs');
 // const { app, downloadImage, uploadImage } = require('./shared');
 const voiceSynthesizerRouter = require('./voice_synthesizer');
 const videoSynthesizerRouter = require('./video_synthesizer');
+const textToSpeech = require('@google-cloud/text-to-speech');
+
 const speechClient = new textToSpeech.v1beta1.TextToSpeechClient();
 // const helmet = require("helmet")
 
