@@ -3,10 +3,19 @@ const fs = require('fs');
 // const { app, downloadImage, uploadImage } = require('./shared');
 const voiceSynthesizerRouter = require('./voice_synthesizer');
 const videoSynthesizerRouter = require('./video_synthesizer');
+const helmet = require("helmet")
 
 // const { comfyuiServerUrl, comfyuiHistoryUrl } = require('./constants');
 
 const app = express();
+app.use(
+  helmet({
+    referrerPolicy: {
+      policy: ["origin", "unsafe-url"],
+    },
+  })
+);
+
 const port = process.env.PORT || 8080;
 
 // Middleware to handle base64-encoded images
