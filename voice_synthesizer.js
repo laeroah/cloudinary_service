@@ -1,17 +1,31 @@
 const express = require('express');
 const textToSpeech = require('@google-cloud/text-to-speech');
+const {GoogleAuth, grpc} = require('google-gax');
 const fs = require('fs');
 const util = require('util');
 // const {saveToCloudStorage} = require('./gcs');
 const {uploadToCloudinary} = require('./cloudinary');
 var xmlToJsonParser = require('xml2json');
-const {start} = require('repl');
 // const {sample_story_ssml, sample_time_points} = require('./constants');
 
 const router = express.Router();
+const apiKey = "AIzaSyDXN-oliEQNG3MO80QgamgALxepKtl86JQ";
+
+const getApiKeyCredentials = () => {
+  const sslCreds = grpc.credentials.createSsl();
+  const googleAuth = new GoogleAuth();
+  const authClient = googleAuth.fromAPIKey(apiKey);
+  const credentials = grpc.credentials.combineChannelCredentials(
+    sslCreds,
+    grpc.credentials.createFromGoogleCredential(authClient)
+  );
+  return credentials;
+};
+
 
 // Creates a client
-const client = new textToSpeech.v1beta1.TextToSpeechClient();
+const sslCreds = getApiKeyCredentials();
+const client = new textToSpeech.v1beta1.TextToSpeechClient(sslCreds);
 const synthesizeVoice = async (ssml_text, audioFileName) => {
   // Construct the request
   const request = {
