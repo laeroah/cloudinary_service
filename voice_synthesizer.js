@@ -22,10 +22,10 @@ const getApiKeyCredentials = () => {
   return credentials;
 };
 
-// Creates a client
-const sslCreds = getApiKeyCredentials();
-const client = new textToSpeech.v1beta1.TextToSpeechClient({sslCreds});
 const synthesizeVoice = async (ssml_text, audioFileName) => {
+  // Creates a client
+  const sslCreds = getApiKeyCredentials();
+  const client = new textToSpeech.v1beta1.TextToSpeechClient({sslCreds});
   // Construct the request
   const request = {
     input: {ssml: ssml_text},
