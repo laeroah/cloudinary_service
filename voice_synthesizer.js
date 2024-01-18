@@ -101,8 +101,8 @@ const tokenizeParagraph = (paragraph, startingCount) => {
   let tokenCount = startingCount;
   let output = '';
 
-  for (let i = 0; i < words.length; i++) {
-    // Insert token every 4 to 5 words
+  for (let i = 0; i < words.length; i+=4) {
+    // Insert token every 4 words
     if (i % 4 === 0 && (i + 4) < words.length) {
       let text = words.slice(i, i + 4).join(' ');
       output += i == 0 ?
@@ -111,7 +111,7 @@ const tokenizeParagraph = (paragraph, startingCount) => {
       output += text;
       tokenCount++;
     } else if (i + 4 >= words.length) {
-      let text = words.slice(i + 1).join(' ');
+      let text = words.slice(i).join(' ');
       output += `<mark name="${tokenCount}" text="${text.trim()}"/>`;
       output += text;
       tokenCount++;
@@ -130,7 +130,6 @@ router.use('/synthesize_voice', async (req, res, next) => {
     const languageCode = 'en';
     const [result] = await client.listVoices({languageCode});
     const voices = result.voices;
-
     voices.forEach((voice) => {
       console.log(
           `${voice.name} (${voice.ssmlGender}): ${voice.languageCodes}`);
