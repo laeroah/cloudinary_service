@@ -72,12 +72,15 @@ const generateSRT = (srtFileName, ssmlStr, timePoints) => {
     console.log('writing to SRT: ' + timeLine);
     subtitleFile.write(text + '\n\n');
     console.log('writing to SRT: ' + text);
-    if (mark.isHead || index == timePoints.length - 1) {
+    if (mark.isHead) {
       paragraphCount++;
       if (paragraphCount > 1) {
         paragraphDurations.push(timeSeconds - previousParagraphStartingSeconds);
       }
       previousParagraphStartingSeconds = timeSeconds;
+    }
+    if (index == timePoints.length - 1) {
+      paragraphDurations.push(nextTimeSeconds - previousParagraphStartingSeconds);
     }
   }
   subtitleFile.end();
