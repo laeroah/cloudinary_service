@@ -5,25 +5,25 @@ const voiceSynthesizerRouter = require('./voice_synthesizer');
 const videoSynthesizerRouter = require('./video_synthesizer');
 const textToSpeech = require('@google-cloud/text-to-speech');
 
-const speechClient = new textToSpeech.v1beta1.TextToSpeechClient();
+// const speechClient = new textToSpeech.v1beta1.TextToSpeechClient();
 // const helmet = require("helmet")
 
 // const { comfyuiServerUrl, comfyuiHistoryUrl } = require('./constants');
 
-const {GoogleAuth} = require('google-auth-library');
+// const {GoogleAuth} = require('google-auth-library');
 
-async function main() {
-  const auth = new GoogleAuth(
-      {scopes: 'https://www.googleapis.com/auth/cloud-platform'});
-  const client = await auth.getClient();
-  const projectId = await auth.getProjectId();
-  const url =
-      `https://texttospeech.googleapis.com/v1/voices`;
-  const res = await client.request({url});
-  console.log(res.data);
-}
+// async function main() {
+//   const auth = new GoogleAuth(
+//       {scopes: 'https://www.googleapis.com/auth/cloud-platform'});
+//   const client = await auth.getClient();
+//   const projectId = await auth.getProjectId();
+//   const url =
+//       `https://texttospeech.googleapis.com/v1/voices`;
+//   const res = await client.request({url});
+//   console.log(res.data);
+// }
 
-main().catch(console.error);
+// main().catch(console.error);
 
 const app = express();
 // app.use(
