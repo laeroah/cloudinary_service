@@ -66,10 +66,12 @@ const generateSRT = (srtFileName, ssmlStr, timePoints) => {
         timeSeconds + 3;
     startTime = timeSeconds.toString().toSRTTimeCode();
     endTime = nextTimeSeconds.toString().toSRTTimeCode();
-    subtitleFile.write(
-        `${startTime} --> ${endTime}` +
-        '\n');
+    const timeLine = `${startTime} --> ${endTime}` +
+        '\n';
+    subtitleFile.write(timeLine);
+    console.log('writing to SRT: ' + timeLine);
     subtitleFile.write(text + '\n\n');
+    console.log('writing to SRT: ' + text);
     if (mark.isHead || index == timePoints.length - 1) {
       paragraphCount++;
       if (paragraphCount > 1) {
@@ -79,6 +81,7 @@ const generateSRT = (srtFileName, ssmlStr, timePoints) => {
     }
   }
   subtitleFile.end();
+  console.log('subtitleFile: ' + subtitleFile);
   return paragraphDurations;
 };
 
@@ -101,7 +104,7 @@ const tokenizeParagraph = (paragraph, startingCount) => {
   let tokenCount = startingCount;
   let output = '';
 
-  for (let i = 0; i < words.length; i+=4) {
+  for (let i = 0; i < words.length; i += 4) {
     // Insert token every 4 words
     if (i % 4 === 0 && (i + 4) < words.length) {
       let text = words.slice(i, i + 4).join(' ');
