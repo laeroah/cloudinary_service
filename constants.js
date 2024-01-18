@@ -53,5 +53,6 @@ cloudinary_config = {
 module.exports = {
   sample_story_ssml,
   animate_durations,
+  cloudinary_config,
   sample_time_points
 };
