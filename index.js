@@ -21,15 +21,6 @@ async function main() {
       `https://texttospeech.googleapis.com/v1/voices`;
   const res = await client.request({url});
   console.log(res.data);
-  console.log("credentials: " + JSON.stringify(auth.credentials));
-
-  const languageCode = 'en';
-  const [result] = await speechClient.listVoices({languageCode});
-  const voices = result.voices;
-
-  voices.forEach((voice) => {
-    console.log(`${voice.name} (${voice.ssmlGender}): ${voice.languageCodes}`);
-  });
 }
 
 main().catch(console.error);
