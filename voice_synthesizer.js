@@ -128,13 +128,14 @@ const tokenizeParagraph = (paragraph, startingCount) => {
 router.use('/synthesize_voice', async (req, res, next) => {
   if (req.method === 'POST') {
     const languageCode = 'en';
-    const [result] = await speechClient.listVoices({languageCode});
+    const [result] = await client.listVoices({languageCode});
     const voices = result.voices;
 
     voices.forEach((voice) => {
       console.log(
           `${voice.name} (${voice.ssmlGender}): ${voice.languageCodes}`);
     });
+
     const filename = Date.now() + '.mp3';  // Generate a unique filename
     const subtitleFileName = Date.now() + '_subtitle.srt';
     if (req.body.paragraphs) {
