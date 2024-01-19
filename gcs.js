@@ -13,21 +13,24 @@ const generateSignedUrl = async (fileName) => {
   };
 
   // Get a v2 signed URL for the file
-  const [url] =
-      await storage.bucket(bucketName).file(fileName).getSignedUrl(options);
+  // const [url] =
+  //     await storage.bucket(bucketName).file(fileName).getSignedUrl(options);
 
-  console.log(`The signed url for ${fileName} is ${url}.`);
-  return url;
+  // console.log(`The signed url for ${fileName} is ${url}.`);
+  // return url;
+
+  return storage.bucket(bucketName).file(fileName).getSignedUrl(options);
 };
 
 // Return the public URL after saving.
-const saveToCloudStorage = async (fileName, filePath) => {
+const saveToCloudStorage = async (localPath, destinationPath) => {
+  console.log("uploading to gcs: " + localPath);
   const options = {
-    destination: fileName,
+    destination: destinationPath,
   };
-  await bucket.upload(filePath, options);
-  console.log(`${filePath} uploaded to ${bucketName}`);
-  return generateSignedUrl(fileName);
+  await bucket.upload(localPath, options);
+  console.log(`${localPath} uploaded to ${bucketName}`);
+  return generateSignedUrl(destinationPath);
 }
 
 module.exports = {

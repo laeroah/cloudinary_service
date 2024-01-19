@@ -2,17 +2,20 @@ const express = require('express');
 const textToSpeech = require('@google-cloud/text-to-speech');
 // const {GoogleAuth, grpc} = require('google-gax');
 const fs = require('fs');
+const fsPromise = require('fs').promises;
 const util = require('util');
-// const {saveToCloudStorage} = require('./gcs');
-const {uploadToCloudinary} = require('./cloudinary');
+const {saveToCloudStorage} = require('./gcs');
+const {uploadToCloudinary, resourceTypeAudio, resourceTypeSubtitle} =
+    require('./cloudinary');
 var xmlToJsonParser = require('xml2json');
+var bodyParser = require('body-parser')
 // const {sample_story_ssml, sample_time_points} = require('./constants');
 
 const router = express.Router();
 // Creates a client
 const client = new textToSpeech.v1beta1.TextToSpeechClient();
 
-const synthesizeVoice = async (ssml_text, audioFileName) => {
+const synthesizeVoice = (ssml_text, audioFileName) => {
   // Construct the request
   const request = {
     input: {ssml: ssml_text},
@@ -25,12 +28,24 @@ const synthesizeVoice = async (ssml_text, audioFileName) => {
     enableTimePointing: ['SSML_MARK']
   };
 
-  // Performs the text-to-speech request
-  const [response] = await client.synthesizeSpeech(request);
-  // Write the binary audio content to a local file
-  const writeFile = util.promisify(fs.writeFile);
-  writeFile(audioFileName, response.audioContent, 'binary');
-  return {audioFileName, timepoints: response.timepoints};
+  var timepoints;
+  return client.synthesizeSpeech(request)
+      .then(([response]) => {
+        timepoints = response.timepoints;
+        return fsPromise.writeFile(
+            `${__dirname}/${audioFileName}`, response.audioContent, 'binary');
+      })
+      .then(() => {
+        return timepoints;
+      })
+
+  // // Performs the text-to-speech request
+  // const [response] = await client.synthesizeSpeech(request);
+  // // Write the binary audio content to a local file
+  // await fsPromise.writeFile(audioFileName, response.audioContent, 'binary');
+  // const timepoints = response.timepoints;
+  // console.log('timepoints: ' + timepoints);
+  // return timepoints;
 };
 
 String.prototype.toSRTTimeCode = function() {
@@ -80,12 +95,17 @@ const generateSRT = (srtFileName, ssmlStr, timePoints) => {
       previousParagraphStartingSeconds = timeSeconds;
     }
     if (index == timePoints.length - 1) {
-      paragraphDurations.push(nextTimeSeconds - previousParagraphStartingSeconds);
+      paragraphDurations.push(
+          nextTimeSeconds - previousParagraphStartingSeconds);
     }
   }
   subtitleFile.end();
-  console.log('subtitleFile: ' + subtitleFile);
-  return paragraphDurations;
+  return new Promise((resolve, reject) => {
+    subtitleFile.on('finish', () => {
+      resolve(paragraphDurations);
+    });
+    subtitleFile.on('error', reject);
+  });
 };
 
 const generateSSML = (paragraphs) => {
@@ -128,38 +148,72 @@ const tokenizeParagraph = (paragraph, startingCount) => {
   return {output: output.trim(), totalToken: tokenCount - startingCount};
 };
 
-// Sample call: curl -X POST -H "Content-Type: application/json" --data
-// '{"paragraphs": ["story paragraph 1 text": "story paragraph 2 text"]}'
-// http://0.0.0.0:8080/synthesize_voice
-router.use('/synthesize_voice', async (req, res, next) => {
+// clang-format off
+/* Sample call:
+curl -X POST -H "Content-Type: application/json" --data \
+'{"paragraphs":["story paragraph 1 text","story paragraph 2 text"], "upload_to_gcs":true}' \
+http://0.0.0.0:8080/synthesize_voice
+*/
+// clang-format on
+
+router.use('/synthesize_voice', bodyParser.json(), async (req, res, next) => {
   if (req.method === 'POST') {
-    const filename = Date.now() + '.mp3';  // Generate a unique filename
+    const audioFileName = Date.now() + '.mp3';  // Generate a unique filename
     const subtitleFileName = Date.now() + '_subtitle.srt';
     if (req.body.paragraphs) {
+      const uploadToGCS = req.body.upload_to_gcs;
       const paragraphs = req.body.paragraphs;
       const ssml = generateSSML(paragraphs);
       console.log(ssml);
-      synthesizeVoice(ssml, filename)
-          .then(({audioFileName, timepoints}) => {
+      synthesizeVoice(ssml, audioFileName)
+          .then((timepoints) => {
+            console.log('result timepoints: ' + JSON.stringify(timepoints));
+            return generateSRT(subtitleFileName, ssml, timepoints);
+          })
+          .then((paragraphDurations) => {
             console.log('audioFileName: ' + audioFileName);
-            const paragraphDurations =
-                generateSRT(subtitleFileName, ssml, timepoints);
             const uploads = [
-              {fileName: audioFileName, resourceType: 'video'},
-              {fileName: subtitleFileName, resourceType: 'raw'}
-            ].map(({fileName, resourceType}) => {
-              // Make public id same as the file path.
-              return uploadToCloudinary(fileName, fileName, resourceType);
+              {fileName: audioFileName, resourceType: resourceTypeAudio},
+              {fileName: subtitleFileName, resourceType: resourceTypeSubtitle}
+            ].map(async ({fileName, resourceType}) => {
+              if (uploadToGCS) {
+                const url = await saveToCloudStorage(
+                    fileName, 'audio_files/' + fileName);
+                return {resourceType, url: url};
+              } else {
+                // Make public id same as the file path.
+                return uploadToCloudinary(fileName, fileName, resourceType);
+              }
             });
             Promise.all(uploads)
-                .then(() => {
-                  console.log('Audio and SRT synthesized successfully!');
-                  res.status(201).send({
-                    message: 'Audio and SRT synthesized successfully!',
-                    audioPublicId: audioFileName,
-                    subtitlePublicId: subtitleFileName,
-                    paragraphDurations
-                  });
+                .then((results) => {
+                  const successMessage =
+                      'Audio and SRT synthesized successfully!';
+                  console.log(successMessage);
+                  if (uploadToGCS) {
+                    var audioUrl;
+                    var subtitleUrl;
+                    for (const result of results) {
+                      if (result.resourceType == resourceTypeAudio) {
+                        audioUrl = result.url;
+                      } else if (result.resourceType == resourceTypeSubtitle) {
+                        subtitleUrl = result.url;
+                      }
+                    }
+                    res.status(201).send({
+                      message: successMessage,
+                      audioUrl,
+                      subtitleUrl,
+                      paragraphDurations
+                    });
+                  } else {
+                    res.status(201).send({
+                      message: successMessage,
+                      audioPublicId: audioFileName,
+                      subtitlePublicId: subtitleFileName,
+                      paragraphDurations
+                    });
+                  }
                 })
                 .catch(error => {
                   console.error(error);
@@ -173,7 +227,6 @@ router.use('/synthesize_voice', async (req, res, next) => {
                   fs.unlinkSync(subtitleFileName);
                   fs.unlinkSync(audioFileName);
                 });
-            console.log('result timepoints: ' + JSON.stringify(timepoints));
           })
           .catch((error) => {
             console.error('Failed to synthesized audio and SRT:', error);

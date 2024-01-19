@@ -1,5 +1,8 @@
 const cloudinary = require('cloudinary').v2;
 const {cloudinary_config} = require('./constants');
+const resourceTypeAudio = 'video';
+const resourceTypeVideo = 'video';
+const resourceTypeSubtitle = 'raw';
 
 cloudinary.config(cloudinary_config);
 
@@ -11,4 +14,7 @@ const uploadToCloudinary = (filePath, publicId, resourceType, tags = []) => {
 
 module.exports = {
   uploadToCloudinary,
+  resourceTypeAudio,
+  resourceTypeVideo,
+  resourceTypeSubtitle
 };
