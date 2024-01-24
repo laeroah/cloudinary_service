@@ -60,8 +60,8 @@ const overlayAudioAndText = (video_id, audio_id, subtitle_id) => {
       {flags: 'layer_apply'}, {
         overlay: {
           // all google fonts are supported
-          font_family: 'luckiest guy',
-          font_size: 30,
+          font_family: 'bangers',
+          font_size: 40,
           resource_type: 'subtitles',
           public_id: subtitle_id
         }
@@ -76,10 +76,11 @@ const overlayAudioAndText = (video_id, audio_id, subtitle_id) => {
 const applyAnimationToImages = (imagePublicIds, animate_durations) => {
   return imagePublicIds.map((publicId, index) => {
     const du = animate_durations[index];
+    const mode = Math.random() < 0.5 ? 'mode_ofr' : '';
     const url = cloudinary.url(publicId, {
       resource_type: 'image',
       transformation: [
-        {effect: `zoompan:mode_ofr;du_${du};to_(g_auto);fps_30`}, {width: 400, crop: 'scale'},
+        {effect: `zoompan:${mode};du_${du};to_(g_auto);fps_30`}, {width: 400, crop: 'scale'},
         {quality: 'auto'}
       ]
     }) + '.mp4';
