@@ -21,7 +21,7 @@ const synthesizeVoice = (ssml_text, audioFileName) => {
     input: {ssml: ssml_text},
     // Select the language and SSML voice gender (optional)
     voice:
-        {languageCode: 'en-GB', ssmlGender: 'FEMALE', name: 'en-GB-Neural2-A'},
+        {languageCode: 'en-GB', ssmlGender: 'MALE', name: 'en-US-Wavenet-I'},
     // select the type of audio encoding
     audioConfig: {audioEncoding: 'MP3'},
     // enable timepoint
