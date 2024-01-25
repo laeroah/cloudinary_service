@@ -3,6 +3,7 @@ const {Storage} = require('@google-cloud/storage');
 const storage = new Storage();
 const bucketName = 'deepstream-experiments-comfyui'
 const bucket = storage.bucket(bucketName)
+const mime = require('mime');
 
 const generateSignedUrl = async (fileName) => {
   // These options will allow temporary read access to the file
