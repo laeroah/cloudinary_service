@@ -4,6 +4,7 @@ const storage = new Storage();
 const bucketName = 'deepstream-experiments-comfyui'
 const bucket = storage.bucket(bucketName)
 const mime = require('mime');
+const fetch = require('node-fetch');
 
 const generateSignedUrl = async (fileName) => {
   // These options will allow temporary read access to the file
@@ -12,13 +13,6 @@ const generateSignedUrl = async (fileName) => {
     action: 'read',
     expires: Date.now() + 1000 * 60 * 60,  // one hour
   };
-
-  // Get a v2 signed URL for the file
-  // const [url] =
-  //     await storage.bucket(bucketName).file(fileName).getSignedUrl(options);
-
-  // console.log(`The signed url for ${fileName} is ${url}.`);
-  // return url;
 
   return storage.bucket(bucketName).file(fileName).getSignedUrl(options);
 };
