@@ -33,6 +33,38 @@ const saveToCloudStorage = async (localPath, destinationPath) => {
   return generateSignedUrl(destinationPath);
 }
 
+// Return the public URL after saving.
+const saveDataToCloudStorage = async (fileURL, destinationPath) => {
+  const response = await fetch(fileURL);
+
+  if (!response.ok) {
+    throw new Error(`Error fetching file: ${response.status}`);
+  }
+
+  // Get a ReadableStream from the response
+  const contentType = response.headers.get('content-type');
+  const extension = mime.getExtension(contentType);
+  const readableStream = response.body;
+  const destFullFilePath = `${destinationPath}/${Date.now()}.${extension}`;
+
+  const fileStream = bucket.file(destFullFilePath).createWriteStream({
+    metadata: {
+      contentType: contentType  // Use the detected MIME type
+    }
+  });
+  readableStream.pipe(fileStream);  // Pipe data to Cloud Storage
+
+  await new Promise((resolve, reject) => {
+    fileStream.on('error', reject);
+    fileStream.on('finish', resolve);
+  });
+
+  console.log(`File saved to Google Cloud Storage: gs://${bucketName}/${
+      destFullFilePath}`);
+  return generateSignedUrl(destFullFilePath);
+};
+
 module.exports = {
   saveToCloudStorage,
+  saveDataToCloudStorage
 };

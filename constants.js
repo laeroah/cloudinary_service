@@ -3,6 +3,7 @@ const sample_story_ssml = `
 `;
 
 const animate_durations = [9.6, 8.3, 7.2, 6.1, 7.3, 4.6, 8.1, 8.1];
+const gcsComfyUIOutputVideoFolder = 'comfyui/output/video';
 
 const sample_time_points = [
   {timeSeconds: 0.08642254769802094, markName: '1'},
@@ -54,5 +55,6 @@ module.exports = {
   sample_story_ssml,
   animate_durations,
   cloudinary_config,
-  sample_time_points
+  sample_time_points,
+  gcsComfyUIOutputVideoFolder
 };

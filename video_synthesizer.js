@@ -1,5 +1,7 @@
 const express = require('express');
 const fs = require('fs');
+const {saveDataToCloudStorage} = require('./gcs');
+const {gcsComfyUIOutputVideoFolder} = require('./constants');
 
 const router = express.Router();
 const {
@@ -80,8 +82,8 @@ const applyAnimationToImages = (imagePublicIds, animate_durations) => {
     const url = cloudinary.url(publicId, {
       resource_type: 'image',
       transformation: [
-        {effect: `zoompan:${mode};du_${du};to_(g_auto);fps_30`}, {width: 400, crop: 'scale'},
-        {quality: 'auto'}
+        {effect: `zoompan:${mode};du_${du};to_(g_auto);fps_30`},
+        {width: 400, crop: 'scale'}, {quality: 'auto'}
       ]
     }) + '.mp4';
     console.log('animated image url: ' + url + '\n');
@@ -175,8 +177,12 @@ router.use('/synthesize_video', async (req, res, next) => {
         })
         .then(() => {
           // overlay audio and text
-          const finalVideoUrl = overlayAudioAndText(
+          const cloudinaryUrl = overlayAudioAndText(
               concatVideoId, req.body.audio, req.body.subtitle);
+          return saveDataToCloudStorage(
+              cloudinaryUrl, gcsComfyUIOutputVideoFolder);
+        })
+        .then((finalVideoUrl) => {
           res.status(201).send(
               {message: 'synthsize video successfully!', finalVideoUrl});
         })
