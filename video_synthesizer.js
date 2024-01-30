@@ -166,7 +166,7 @@ router.use('/overlay_effect', async (req, res, next) => {
           return saveDataToCloudStorage(
               cloudinaryUrl, gcsComfyUIOutputVideoFolder);
         })
-        .then((finalVideoUrl) => {
+        .then(([finalVideoUrl]) => {
           res.status(201).send(
               {message: 'add overlay successfully!', finalVideoUrl});
         })
@@ -234,7 +234,7 @@ router.use('/synthesize_video', async (req, res, next) => {
           return saveDataToCloudStorage(
               cloudinaryUrl, gcsComfyUIOutputVideoFolder);
         })
-        .then((finalVideoUrl) => {
+        .then(([finalVideoUrl]) => {
           res.status(201).send(
               {message: 'synthsize video successfully!', finalVideoUrl});
         })
