@@ -153,7 +153,7 @@ router.use('/overlay_effect', async (req, res, next) => {
   if (req.method === 'POST') {
     const videoUrl = req.body.video_url;
     const effectName = req.body.effect_name;
-    if (!overlay_effect.hasOwnProperty(effectName)) {
+    if (effectName && !overlay_effect.hasOwnProperty(effectName)) {
       return res.status(400).send(
           {message: `No effect name ${effectName} found.`});
     }
