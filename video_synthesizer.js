@@ -8,7 +8,8 @@ const {
   sample_story_ssml,
   sample_time_points,
   animate_durations,
-  cloudinary_config
+  cloudinary_config,
+  overlay_effect
 } = require('./constants');
 const cloudinary = require('cloudinary').v2;
 const {uploadToCloudinary} = require('./cloudinary');
@@ -91,6 +92,20 @@ const applyAnimationToImages = (imagePublicIds, animate_durations) => {
   });
 };
 
+const applyOverlayToImage = (overlayId, videoId) => {
+  console.log('overlay id: ' + overlayId + '\n');
+  const url = cloudinary.url(videoId, {
+    resource_type: 'video',
+    transformation: [
+      {overlay: overlayId, opacity: 50},
+      {width: 512, height: 904, crop: 'scale'},
+      {flags: 'layer_apply'}
+    ]
+  }) + '.mp4';
+  console.log('overlay applied image url: ' + url + '\n');
+  return url;
+};
+
 const concatVideos = (videoPublicIds) => {
   const videoHeight = imageHeight;
   const videoWidth = imageWidth;
@@ -124,6 +139,43 @@ router.use('/overlay_audio_and_text', async (req, res, next) => {
         '1705500583066_concat_video', '1705467727438.mp3.mp3',
         '1705467727438_subtitle.srt');
     res.status(201).send({message: 'Sample video synthesized successfully!'});
+  } else {
+    next();
+  }
+});
+
+/* Sample call:
+curl -X POST -H "Content-Type: application/json" --data \
+'{"video_url":"https://res.cloudinary.com/dgxcndjdr/video/upload/v1706569639/1706569620812_concat_video.mp4","effect_name":"cherry_petals"}'
+\ http://0.0.0.0:8080/overlay_effect
+*/
+router.use('/overlay_effect', async (req, res, next) => {
+  if (req.method === 'POST') {
+    const videoUrl = req.body.video_url;
+    const effectName = req.body.effect_name;
+    if (!overlay_effect.hasOwnProperty(effectName)) {
+      return res.status(400).send(
+          {message: `No effect name ${effectName} found.`});
+    }
+    const videoId = Date.now() + '_effect_overlay_video_base';
+    uploadToCloudinary(videoUrl, videoId, 'video')
+        .then(() => {
+          const cloudinaryUrl = applyOverlayToImage(
+              overlay_effect.getCloudinaryPublicIdFromName(effectName),
+              videoId);
+          return saveDataToCloudStorage(
+              cloudinaryUrl, gcsComfyUIOutputVideoFolder);
+        })
+        .then((finalVideoUrl) => {
+          res.status(201).send(
+              {message: 'add overlay successfully!', finalVideoUrl});
+        })
+        .catch(error => {
+          console.error(error);
+          return res.status(400).send({
+            message: 'Failed to add overlay. Error: ' + JSON.stringify(error)
+          });
+        });
   } else {
     next();
   }

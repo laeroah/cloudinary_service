@@ -51,10 +51,25 @@ cloudinary_config = {
   api_secret: '09czU54XnUfCElaxhTNg7LOnEkQ'
 };
 
+const overlay_effect = {
+  snow: 'snow',
+  cherry_petals: 'cherry_petals',
+  getCloudinaryPublicIdFromName: (name) => {
+    switch(name) {
+      case 'snow':
+        return 'snow_fall_kgkjtx';
+      case 'cherry_petals':
+        return 'cherry_blossom_isllxl';
+    }
+  }
+};
+
 module.exports = {
   sample_story_ssml,
   animate_durations,
   cloudinary_config,
   sample_time_points,
-  gcsComfyUIOutputVideoFolder
+  gcsComfyUIOutputVideoFolder,
+  overlay_effect
 };
+

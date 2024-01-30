@@ -38,14 +38,6 @@ const synthesizeVoice = (ssml_text, audioFileName) => {
       .then(() => {
         return timepoints;
       })
-
-  // // Performs the text-to-speech request
-  // const [response] = await client.synthesizeSpeech(request);
-  // // Write the binary audio content to a local file
-  // await fsPromise.writeFile(audioFileName, response.audioContent, 'binary');
-  // const timepoints = response.timepoints;
-  // console.log('timepoints: ' + timepoints);
-  // return timepoints;
 };
 
 String.prototype.toSRTTimeCode = function() {
