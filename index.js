@@ -3,6 +3,7 @@ const fs = require('fs');
 // const { app, downloadImage, uploadImage } = require('./shared');
 const voiceSynthesizerRouter = require('./voice_synthesizer');
 const videoSynthesizerRouter = require('./video_synthesizer');
+const musicSynthesizerRouter = require('./music_synthesizer');
 const textToSpeech = require('@google-cloud/text-to-speech');
 
 // const speechClient = new textToSpeech.v1beta1.TextToSpeechClient();
@@ -50,6 +51,9 @@ app.use(voiceSynthesizerRouter);
 
 // Use the router for '/synthesize_video'
 app.use(videoSynthesizerRouter);
+
+// Use the router for '/synthesize_music'
+app.use(musicSynthesizerRouter);
 
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);

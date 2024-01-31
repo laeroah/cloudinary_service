@@ -51,6 +51,10 @@ cloudinary_config = {
   api_secret: '09czU54XnUfCElaxhTNg7LOnEkQ'
 };
 
+const sound_api_key = "AIzaSyDNucOdmgRauWgfJ5F0gUg4Guy6WSNuPbc";
+const sound_api = "https://autopush-soundsearch-pa.sandbox.googleapis.com/v1:generate";
+var sound_api_data = JSON.parse("{\"requestContext\":{\"audioLengthSeconds\":30,\"audioContainer\":1,\"cfgOptions\":{\"negativeDescription\":\"badaudioquality\",\"guidance1\":4,\"guidance2\":3},\"loop\":\"FALSE\"},\"entryPoint\":1,\"flow\":19,\"description\":\"aguitarsolo\"}");
+
 const overlay_effect = {
   snow: 'snow',
   cherry_petals: 'cherry_petals',
@@ -70,6 +74,9 @@ module.exports = {
   cloudinary_config,
   sample_time_points,
   gcsComfyUIOutputVideoFolder,
-  overlay_effect
+  overlay_effect,
+  sound_api_key,
+  sound_api,
+  sound_api_data
 };
 
