@@ -18,15 +18,17 @@ const generateSignedUrl = async (fileName) => {
 };
 
 // Return the public URL after saving.
-const saveToCloudStorage = async (localPath, destinationPath) => {
-  console.log("uploading to gcs: " + localPath);
+const saveToCloudStorage = (localPath, destinationPath) => {
+  console.log('uploading to gcs: ' + localPath);
   const options = {
     destination: destinationPath,
   };
-  await bucket.upload(localPath, options);
-  console.log(`${localPath} uploaded to ${bucketName}`);
-  return generateSignedUrl(destinationPath);
-}
+  return bucket.upload(localPath, options).then(() => {
+    console.log(`File saved to Google Cloud Storage: gs://${bucketName}/${
+        destinationPath}`);
+    return generateSignedUrl(destinationPath)
+  });
+};
 
 // Return the public URL after saving.
 const saveDataToCloudStorage = async (fileURL, destinationPath) => {
