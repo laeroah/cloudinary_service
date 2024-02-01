@@ -143,7 +143,7 @@ const tokenizeParagraph = (paragraph, startingCount) => {
 // clang-format off
 /* Sample call:
 curl -X POST -H "Content-Type: application/json" --data \
-'{"paragraphs":["story paragraph 1 text","story paragraph 2 text"], "upload_to_gcs":true}' \
+'{"paragraphs":["story paragraph 1 text","story paragraph 2 text"], "upload_to_gcs":false}' \
 http://0.0.0.0:8080/synthesize_voice
 */
 // clang-format on
@@ -164,6 +164,7 @@ router.use('/synthesize_voice', bodyParser.json(), async (req, res, next) => {
           })
           .then((paragraphDurations) => {
             console.log('audioFileName: ' + audioFileName);
+            const totalDuration = paragraphDurations.reduce((a, b) => a + b, 0);
             const uploads = [
               {fileName: audioFileName, resourceType: resourceTypeAudio},
               {fileName: subtitleFileName, resourceType: resourceTypeSubtitle}
@@ -196,14 +197,16 @@ router.use('/synthesize_voice', bodyParser.json(), async (req, res, next) => {
                       message: successMessage,
                       audioUrl,
                       subtitleUrl,
-                      paragraphDurations
+                      paragraphDurations,
+                      totalDuration
                     });
                   } else {
                     res.status(201).send({
                       message: successMessage,
                       audioPublicId: audioFileName,
                       subtitlePublicId: subtitleFileName,
-                      paragraphDurations
+                      paragraphDurations,
+                      totalDuration
                     });
                   }
                 })

@@ -12,7 +12,12 @@ const {
   overlay_effect
 } = require('./constants');
 const cloudinary = require('cloudinary').v2;
-const {uploadToCloudinary} = require('./cloudinary');
+const {
+  uploadToCloudinary,
+  resourceTypeAudio,
+  resourceTypeVideo,
+  resourceTypeSubtitle
+} = require('./cloudinary');
 const imagePublicIds = [
   'solid-color-image-1', 'solid-color-image-2', 'solid-color-image-3',
   'solid-color-image-4', 'solid-color-image-5', 'solid-color-image-6',
@@ -98,8 +103,7 @@ const applyOverlayToImage = (overlayId, videoId) => {
     resource_type: 'video',
     transformation: [
       {overlay: overlayId, opacity: 50},
-      {width: 512, height: 904, crop: 'scale'},
-      {flags: 'layer_apply'}
+      {width: 512, height: 904, crop: 'scale'}, {flags: 'layer_apply'}
     ]
   }) + '.mp4';
   console.log('overlay applied image url: ' + url + '\n');
@@ -316,6 +320,55 @@ router.use('/concat_videos', async (req, res, next) => {
         {resource_type: 'video', transformation});
     console.log('concat video: ' + url + '\n');
     res.status(200).send({message: 'concat videos successfully!'});
+  } else {
+    next();
+  }
+});
+
+// clang-format off
+/* Sample call:
+curl -X POST -H "Content-Type: application/json" --data \
+'{"sound_url":url, "video_url":url, "start_offset_sec": 2.2, "duration": 3}' \
+http://0.0.0.0:8080/add_sound_to_video
+*/
+// clang-format on
+router.use('/add_sound_to_video', async (req, res, next) => {
+  if (req.method === 'POST') {
+    const soundUrl = req.body.sound_url;
+    const videoUrl = req.body.video_url;
+    const start_offset = req.body.start_offset_sec;
+    const duration = req.body.duration;
+    const soundCloudinaryId = Date.now() + 'sound_file';
+    const videoCloudinaryId = Date.now() + 'video_file';
+    var uploads = [];
+    uploads.push(
+        uploadToCloudinary(soundUrl, soundCloudinaryId, resourceTypeAudio));
+    uploads.push(
+        uploadToCloudinary(videoUrl, videoCloudinaryId, resourceTypeVideo));
+    Promise.all(uploads)
+        .then(() => {
+          var transformation = [
+            {
+              overlay: {
+                resource_type: 'audio',
+                public_id: soundCloudinaryId + '.mp3'
+              }
+            },
+            {effect: 'volume:-60'}
+          ];
+          transformation.push({flags: 'layer_apply', duration, start_offset});
+          const url = cloudinary.url(
+                          videoCloudinaryId,
+                          {resource_type: resourceTypeVideo, transformation}) +
+              '.mp4';
+          console.log('url: ' + url + '\n');
+          res.status(200).send({message: 'success', url});
+        })
+        .catch(error => {
+          console.error(error);
+          return res.status(500).send(
+              {message: 'Failed to add sound to video. Error: ' + error});
+        });
   } else {
     next();
   }
