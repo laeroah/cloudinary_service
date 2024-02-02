@@ -9,6 +9,8 @@ const router = express.Router();
 const generateSound = (prompt, lengthSec) => {
   sound_api_data.description = prompt;
   sound_api_data.requestContext.audioLengthSeconds = lengthSec;
+  console.log("generating sound prompt: " + prompt);
+  console.log("generating sound length: " + lengthSec);
   return fetch(sound_api, {
     method: 'POST',
     headers:
