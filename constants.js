@@ -53,7 +53,7 @@ cloudinary_config = {
 
 const sound_api_key = "AIzaSyDNucOdmgRauWgfJ5F0gUg4Guy6WSNuPbc";
 const sound_api = "https://autopush-soundsearch-pa.sandbox.googleapis.com/v1:generate";
-var sound_api_data = JSON.parse("{\"requestContext\":{\"audioLengthSeconds\":30.0,\"audioContainer\":6,\"cfgOptions\":{\"negativeDescription\":\"bad audio quality\",\"guidance1\":4,\"guidance2\":3},\"loop\":\"FALSE\"},\"entryPoint\":1,\"flow\":19,\"description\":\"aguitarsolo\"}");
+var sound_api_data = JSON.parse("{\"requestContext\":{\"audioLengthSeconds\":15.0,\"audioContainer\":6,\"cfgOptions\":{\"negativeDescription\":\"bad audio quality\",\"guidance1\":4,\"guidance2\":3},\"loop\":\"FALSE\"},\"entryPoint\":1,\"flow\":19,\"description\":\"aguitarsolo\"}");
 
 const overlay_effect = {
   snow: 'snow',

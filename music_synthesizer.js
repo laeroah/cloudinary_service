@@ -8,7 +8,10 @@ const router = express.Router();
 
 const generateSound = (prompt, lengthSec) => {
   sound_api_data.description = prompt;
+  // This is currently ignored.
   sound_api_data.requestContext.audioLengthSeconds = lengthSec;
+  // Hardcode to max 2 continuation to generate 70s sound track. Enough for short videos.
+  sound_api_data.requestContext.num_continuations = 2;
   console.log("generating sound prompt: " + prompt);
   console.log("generating sound length: " + lengthSec);
   return fetch(sound_api, {

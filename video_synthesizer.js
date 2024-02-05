@@ -354,7 +354,7 @@ router.use('/add_sound_to_video', async (req, res, next) => {
                 public_id: soundCloudinaryId + '.mp3'
               }
             },
-            {effect: 'volume:-70'}
+            {effect: 'volume:-80'}
           ];
           transformation.push({flags: 'layer_apply', duration, start_offset});
           const url = cloudinary.url(
