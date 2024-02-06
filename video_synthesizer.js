@@ -17,6 +17,7 @@ const {
   uploadToCloudinary,
   resourceTypeAudio,
   resourceTypeVideo,
+  resourceTypeImage,
   resourceTypeSubtitle
 } = require('./cloudinary');
 const imagePublicIds = [
@@ -40,25 +41,6 @@ const sampleStoryImageTag = sampleStoryName + '-tag'
 
 cloudinary.config(cloudinary_config);
 
-const createSampleVideo = async () => {
-  const uploadPromises = imagePublicIds.map(publicId => {
-    return cloudinary.uploader.upload(
-        `sample_images/${publicId}.jpeg`, {public_id: publicId, tags: tag});
-  });
-  return Promise.all(uploadPromises)
-      .then(result => {
-        // Step 2: Use the multi method to create animated image
-        return cloudinary.uploader.multi(tag, {resource_type: 'image'});
-      })
-      .then(result => {
-        // Step 3: Deliver the animated image
-        return cloudinary.url(`${tag}.gif`, {type: 'multi'});
-      })
-      .catch(error => {
-        console.error(error);
-      });
-};
-
 // Pass cloudinary asset public ids.
 const overlayAudioAndText = (video_id, audio_id, subtitle_id) => {
   const videoUrl = cloudinary.url(video_id, {
@@ -70,6 +52,28 @@ const overlayAudioAndText = (video_id, audio_id, subtitle_id) => {
         overlay: {
           // all google fonts are supported
           font_family: 'bangers',
+          font_size: 40,
+          resource_type: 'subtitles',
+          public_id: subtitle_id
+        }
+      },
+      {flags: 'layer_apply', gravity: 'center'}
+    ]
+  }) + '.mp4';
+  console.log('overlayed video URL: ' + videoUrl);
+  return videoUrl;
+};
+
+const overlayTimeCaption = (video_id, subtitle_id, font_family = 'bangers') => {
+  subtitle_id =
+      subtitle_id.endsWith('.srt') ? subtitle_id : `${subtitle_id}.srt`;
+  const videoUrl = cloudinary.url(video_id, {
+    resource_type: 'video',
+    transformation: [
+      {
+        overlay: {
+          // all google fonts are supported
+          font_family: font_family,
           font_size: 40,
           resource_type: 'subtitles',
           public_id: subtitle_id
@@ -178,7 +182,41 @@ router.use('/overlay_effect', async (req, res, next) => {
  * @param {Float} length - the length of the motion.
  */
 router.use('/image/camera_motion', async (req, res, next) => {
+  // clang-format off
+  /* Sample call:
+  curl -X POST -H "Content-Type: application/json" --data \
+  '{"image_url":"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Image_created_with_a_mobile_phone.png/1920px-Image_created_with_a_mobile_phone.png","length": 3.2}' \
+  http://0.0.0.0:8080/image/camera_motion
+  */
+  // clang-format on
   if (req.method === 'POST') {
+    const imageUrl = req.body.image_url;
+    const length = req.body.length;
+    if (imageUrl && length) {
+      const imagePublicId = publicIdBase('image');
+      uploadToCloudinary(imageUrl, imagePublicId, resourceTypeImage)
+          .then(() => {
+            const [animatedImageUrl] =
+                applyAnimationToImages([imagePublicId], [length]);
+            return saveDataToCloudStorage(
+                animatedImageUrl, gcsOutputVideoFolder);
+          })
+          .then(([url]) => {
+            return res.json({success: true, url});
+          })
+          .catch(error => {
+            console.error(error);
+            return res.status(500).send({
+              message: 'Failed to add motion to image. Error: ' +
+                  JSON.stringify(error)
+            });
+          });
+    } else {
+      return res.status(500).send({
+        message:
+            'Failed to add motion to video. Error: missing input image_url or length.'
+      });
+    }
   } else {
     next();
   }
@@ -189,9 +227,50 @@ router.use('/image/camera_motion', async (req, res, next) => {
  * Returns the resulting video URL.
  * @param {String} video_url - url of the video to add caption overlay to.
  * @param {String} caption_url - caption file (.srt) file URL.
+ * @param {String} font_family - font family of the subtitle. All google fonts
+ *     are supported. Default is `bangers`
  */
 router.use('/video/caption', async (req, res, next) => {
+  // clang-format off
+  /* Sample call:
+  curl -X POST -H "Content-Type: application/json" --data \
+  '{"video_url":"http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4","caption_url": "https://res.cloudinary.com/dgxcndjdr/raw/upload/v1707230885/1707230883740_subtitle.srt"}' \
+  http://0.0.0.0:8080/video/caption
+  */
+  // clang-format on
   if (req.method === 'POST') {
+    const videoUrl = req.body.video_url;
+    const captionUrl = req.body.caption_url;
+    const fontFamily = req.body.font_family || 'bangers';
+    if (videoUrl && captionUrl) {
+      const videoPublicId = publicIdBase('video');
+      const captionPublicId = publicIdBase('caption');
+      uploadToCloudinary(videoUrl, videoPublicId, resourceTypeVideo)
+          .then(() => {
+            return uploadToCloudinary(
+                captionUrl, captionPublicId, resourceTypeSubtitle);
+          })
+          .then(() => {
+            const cloudinaryUrl =
+                overlayTimeCaption(videoPublicId, captionPublicId, fontFamily);
+            return saveDataToCloudStorage(cloudinaryUrl, gcsOutputVideoFolder);
+          })
+          .then(([url]) => {
+            return res.json({success: true, url});
+          })
+          .catch(error => {
+            console.error(error);
+            return res.status(400).send({
+              message: 'Failed to add caption to video. Error: ' +
+                  JSON.stringify(error)
+            });
+          });
+    } else {
+      return res.status(500).send({
+        message:
+            'Failed to add caption to video. Error: missing input video_url or caption_url.'
+      });
+    }
   } else {
     next();
   }
@@ -202,7 +281,7 @@ router.use('/video/caption', async (req, res, next) => {
  * Returns the resulting video URL.
  * @param {Array} video_urls - array of URLs of videos to concatenate.
  */
-router.use('/concat_videos', async (req, res, next) => {
+router.use('/video/concat', async (req, res, next) => {
   // clang-format off
   /* Sample call:
   curl -X POST -H "Content-Type: application/json" \
@@ -248,7 +327,8 @@ router.use('/concat_videos', async (req, res, next) => {
 curl -X POST -H "Content-Type: application/json" --data \
 '{"story_images":["https://res.cloudinary.com/dgxcndjdr/image/upload/v1705428955/sample_story_1_1.jpg","https://res.cloudinary.com/dgxcndjdr/image/upload/v1705428955/sample_story_1_2.jpg"],
 "durations":[6.2, 5.2], "audio":"1705467727438.mp3",
-"subtitle":"1705467727438_subtitle.srt"}' \ http://0.0.0.0:8080/synthesize_video
+"subtitle":"1705467727438_subtitle.srt"}' \
+http://0.0.0.0:8080/synthesize_video
 */
 router.use('/synthesize_video', async (req, res, next) => {
   // Step 1. upload all images to cloudinary
@@ -361,10 +441,10 @@ router.use('/apply_zoom_pan_images', async (req, res, next) => {
 /* Sample call:
 curl -X POST -H "Content-Type: application/json" --data \
 '{"sound_url":url, "video_url":url, "start_offset_sec": 2.2, "duration": 3}' \
-http://0.0.0.0:8080/add_sound_to_video
+http://0.0.0.0:8080/video/sound
 */
 // clang-format on
-router.use('/add_sound_to_video', async (req, res, next) => {
+router.use('/video/sound', async (req, res, next) => {
   if (req.method === 'POST') {
     const soundUrl = req.body.sound_url;
     const videoUrl = req.body.video_url;
