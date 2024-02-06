@@ -32,6 +32,11 @@ const processSoundResponse = (response, fileName) => {
   }
 };
 
+/**
+ * Synthesize music based on a prompt.
+ * Returns the resulting mp3 file URL.
+ * @param {String} prompt - prompt to generate music.
+ */
 router.use('/synthesize_music', async (req, res, next) => {
   if (req.method === 'POST') {
     const soundFileName = Date.now() + '_music.mp3';

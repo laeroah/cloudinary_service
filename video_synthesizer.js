@@ -1,7 +1,8 @@
 const express = require('express');
 const fs = require('fs');
 const {saveDataToCloudStorage} = require('./gcs');
-const {gcsComfyUIOutputVideoFolder} = require('./constants');
+const {gcsComfyUIOutputVideoFolder, gcsOutputVideoFolder} =
+    require('./constants');
 
 const router = express.Router();
 const {
@@ -128,25 +129,10 @@ const concatVideos = (videoPublicIds) => {
   return url;
 };
 
-// https://res.cloudinary.com/dgxcndjdr/video/upload/l_audio:sample_story_1/sample_story_1.mp3/fl_layer_apply/l_subtitles:sample_story_1:sample_story_1.srt/fl_layer_apply/v1/sample_story_1/sample_story_1_concat.mp4
-// https://res.cloudinary.com/dgxcndjdr/video/upload/l_subtitles:sample_story_1:sample_story_1.srt/fl_layer_apply/v1/sample_story_1/sample_story_1_concat.mp4
-// https://res.cloudinary.com/dgxcndjdr/video/upload/l_audio:sample_story_1:sample_story_1.mp3/fl_layer_apply/v1/sample_story_1/sample_story_1_concat.mp4
-// https://res.cloudinary.com/dgxcndjdr/video/upload/l_audio:1705467727438.mp3/fl_layer_apply/l_subtitles:anton_30:1705467727438_subtitle.srt/fl_layer_apply,g_center/1705500583066_concat_video
-// https://res.cloudinary.com/dgxcndjdr/video/upload/l_audio:sample_story_1/fl_layer_apply/l_subtitles:anton_30:sample_story_1:sample_story_1.srt/fl_layer_apply,g_center/v1/sample_story_1/sample_story_1_concat
-
-router.use('/overlay_audio_and_text', async (req, res, next) => {
-  // Step 1. Overlay the video with text caption
-  // Step 4. Overlay the srt
-  if (req.method === 'GET') {
-    const storyName = req.body.story_name;
-    overlayAudioAndText(
-        '1705500583066_concat_video', '1705467727438.mp3.mp3',
-        '1705467727438_subtitle.srt');
-    res.status(201).send({message: 'Sample video synthesized successfully!'});
-  } else {
-    next();
-  }
-});
+const publicIdBase = (prefix) => {
+  const nameBase = Date.now();
+  return `${prefix}_${nameBase}`;
+};
 
 /* Sample call:
 curl -X POST -H "Content-Type: application/json" --data \
@@ -184,6 +170,79 @@ router.use('/overlay_effect', async (req, res, next) => {
     next();
   }
 });
+
+/**
+ * Adds camera motion to an image. Currently only zoompan effect is supported.
+ * Returns the resulting video URL.
+ * @param {String} image_url - url of the image to add camera motion to.
+ * @param {Float} length - the length of the motion.
+ */
+router.use('/image/camera_motion', async (req, res, next) => {
+  if (req.method === 'POST') {
+  } else {
+    next();
+  }
+});
+
+/**
+ * Adds timed caption to a video.
+ * Returns the resulting video URL.
+ * @param {String} video_url - url of the video to add caption overlay to.
+ * @param {String} caption_url - caption file (.srt) file URL.
+ */
+router.use('/video/caption', async (req, res, next) => {
+  if (req.method === 'POST') {
+  } else {
+    next();
+  }
+});
+
+/**
+ * Concatenate multiple videos into a single video.
+ * Returns the resulting video URL.
+ * @param {Array} video_urls - array of URLs of videos to concatenate.
+ */
+router.use('/concat_videos', async (req, res, next) => {
+  // clang-format off
+  /* Sample call:
+  curl -X POST -H "Content-Type: application/json" \
+  -d '{"video_urls":["http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4","http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4"]}' \
+  http://0.0.0.0:8080/concat_videos
+  */
+  // clang-format on
+  if (req.method === 'POST') {
+    const videoUrls = req.body.video_urls;
+    if (!videoUrls) {
+      return res.status(500).send({
+        message: 'Failed to concat videos. Error: missing input video_urls.'
+      });
+    }
+    let videoPublicIds = [];
+    const uploadVideoPromises = videoUrls.map((videoUrl, index) => {
+      const publicId = publicIdBase(`concat_${index}`);
+      videoPublicIds.push(publicId);
+      return uploadToCloudinary(videoUrl, publicId, resourceTypeVideo);
+    });
+    Promise.all(uploadVideoPromises)
+        .then(() => {
+          const videoUrl = concatVideos(videoPublicIds);
+          return saveDataToCloudStorage(videoUrl, gcsOutputVideoFolder);
+        })
+        .then(([url]) => {
+          return res.json({success: true, url});
+        })
+        .catch(error => {
+          console.error(error);
+          return res.status(400).send({
+            message:
+                'Failed to synthsize video. Error: ' + JSON.stringify(error)
+          });
+        });
+  } else {
+    next();
+  }
+});
+
 
 /* Sample call:
 curl -X POST -H "Content-Type: application/json" --data \
@@ -293,33 +352,6 @@ router.use('/apply_zoom_pan_images', async (req, res, next) => {
           return url;
         });
     res.status(200).send({message: 'zoom pan animated apply successfully!'});
-  } else {
-    next();
-  }
-});
-
-router.use('/concat_videos', async (req, res, next) => {
-  if (req.method === 'POST') {
-    const storyName = req.body.story_name;
-    const videoHeight = imageHeight;
-    const videoWidth = imageWidth;
-    const totalVideoCount = imagePublicIds_sample_story.length;
-    var transformation =
-        [{height: videoHeight, width: videoWidth, crop: 'fill'}];
-    for (let i = 1; i < totalVideoCount; i++) {
-      transformation.push({
-        flags: 'splice',
-        overlay: `video:${storyName}:${imagePublicIds_sample_story[i]}`
-      });
-      transformation.push(
-          {height: videoHeight, width: videoWidth, crop: 'fill'},
-          {flags: 'layer_apply'});
-    }
-    const url = cloudinary.url(
-        `${storyName}/${imagePublicIds_sample_story[0]}.mp4`,
-        {resource_type: 'video', transformation});
-    console.log('concat video: ' + url + '\n');
-    res.status(200).send({message: 'concat videos successfully!'});
   } else {
     next();
   }
