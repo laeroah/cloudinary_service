@@ -42,27 +42,28 @@ const sampleStoryImageTag = sampleStoryName + '-tag'
 cloudinary.config(cloudinary_config);
 
 // Pass cloudinary asset public ids.
-const overlayAudioAndText = (video_id, audio_id, subtitle_id) => {
-  const videoUrl = cloudinary.url(video_id, {
-    resource_type: 'video',
-    transformation: [
-      // cloudinary adds .mp3 to public id of mp3.
-      {overlay: {resource_type: 'audio', public_id: audio_id + '.mp3'}},
-      {flags: 'layer_apply'}, {
-        overlay: {
-          // all google fonts are supported
-          font_family: 'bangers',
-          font_size: 40,
-          resource_type: 'subtitles',
-          public_id: subtitle_id
-        }
-      },
-      {flags: 'layer_apply', gravity: 'center'}
-    ]
-  }) + '.mp4';
-  console.log('overlayed video URL: ' + videoUrl);
-  return videoUrl;
-};
+const overlayAudioAndText =
+    (video_id, audio_id, subtitle_id, gravity = 'center') => {
+      const videoUrl = cloudinary.url(video_id, {
+        resource_type: 'video',
+        transformation: [
+          // cloudinary adds .mp3 to public id of mp3.
+          {overlay: {resource_type: 'audio', public_id: audio_id + '.mp3'}},
+          {flags: 'layer_apply'}, {
+            overlay: {
+              // all google fonts are supported
+              font_family: 'bangers',
+              font_size: 40,
+              resource_type: 'subtitles',
+              public_id: subtitle_id
+            }
+          },
+          {flags: 'layer_apply', gravity}
+        ]
+      }) + '.mp4';
+      console.log('overlayed video URL: ' + videoUrl);
+      return videoUrl;
+    };
 
 const overlayTimeCaption = (video_id, subtitle_id, font_family = 'bangers') => {
   subtitle_id =
@@ -286,7 +287,7 @@ router.use('/video/concat', async (req, res, next) => {
   /* Sample call:
   curl -X POST -H "Content-Type: application/json" \
   -d '{"video_urls":["http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4","http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4"]}' \
-  http://0.0.0.0:8080/concat_videos
+  http://0.0.0.0:8080/video/concat
   */
   // clang-format on
   if (req.method === 'POST') {
@@ -338,6 +339,7 @@ router.use('/synthesize_video', async (req, res, next) => {
   // Step 5. Adds audio and text caption overlay
   if (req.method === 'POST') {
     const storyImageUrls = req.body.story_images;
+    const textOverlayGravity = req.body.text_overlay_gravity || 'center';
     const nameBase = Date.now();
     const tag = nameBase + '_tag';
     let publicIdBase = nameBase + '_story_image';
@@ -373,7 +375,8 @@ router.use('/synthesize_video', async (req, res, next) => {
         .then(() => {
           // overlay audio and text
           const cloudinaryUrl = overlayAudioAndText(
-              concatVideoId, req.body.audio, req.body.subtitle);
+              concatVideoId, req.body.audio, req.body.subtitle,
+              textOverlayGravity);
           return saveDataToCloudStorage(
               cloudinaryUrl, gcsComfyUIOutputVideoFolder);
         })
