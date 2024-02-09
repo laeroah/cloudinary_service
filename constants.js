@@ -60,13 +60,19 @@ const overlay_effect = {
   snow: 'snow',
   cherry_petals: 'cherry_petals',
   getCloudinaryPublicIdFromName: (name) => {
-    switch(name) {
+    switch (name) {
       case 'snow':
         return 'snow_fall_kgkjtx';
       case 'cherry_petals':
         return 'cherry_blossom_isllxl';
     }
   }
+};
+
+const default_voice_options = {
+  languageCode: 'en-GB',
+  ssmlGender: 'MALE',
+  name: 'en-US-Wavenet-I'
 };
 
 module.exports = {
@@ -79,6 +85,6 @@ module.exports = {
   overlay_effect,
   sound_api_key,
   sound_api,
-  sound_api_data
+  sound_api_data,
+  default_voice_options
 };
-

@@ -9,19 +9,18 @@ const {uploadToCloudinary, resourceTypeAudio, resourceTypeSubtitle} =
     require('./cloudinary');
 var xmlToJsonParser = require('xml2json');
 var bodyParser = require('body-parser')
-// const {sample_story_ssml, sample_time_points} = require('./constants');
+const {default_voice_options} = require('./constants');
 
 const router = express.Router();
 // Creates a client
 const client = new textToSpeech.v1beta1.TextToSpeechClient();
 
-const synthesizeVoice = (ssml_text, audioFileName) => {
+const synthesizeVoice = (ssml_text, audioFileName, voiceOptions) => {
   // Construct the request
   const request = {
     input: {ssml: ssml_text},
     // Select the language and SSML voice gender (optional)
-    voice:
-        {languageCode: 'en-GB', ssmlGender: 'MALE', name: 'en-US-Wavenet-I'},
+    voice: voiceOptions,
     // select the type of audio encoding
     audioConfig: {audioEncoding: 'MP3'},
     // enable timepoint
@@ -145,6 +144,8 @@ const tokenizeParagraph = (paragraph, startingCount) => {
 curl -X POST -H "Content-Type: application/json" --data \
 '{"paragraphs":["story paragraph 1 text","story paragraph 2 text"], "upload_to_gcs":false}' \
 http://0.0.0.0:8080/synthesize_voice
+
+voice options list: https://cloud.google.com/text-to-speech/docs/voices
 */
 // clang-format on
 
@@ -155,9 +156,10 @@ router.use('/synthesize_voice', bodyParser.json(), async (req, res, next) => {
     if (req.body.paragraphs) {
       const uploadToGCS = req.body.upload_to_gcs;
       const paragraphs = req.body.paragraphs;
+      const voiceOptions = req.body.voice_options || default_voice_options;
       const ssml = generateSSML(paragraphs);
       console.log(ssml);
-      synthesizeVoice(ssml, audioFileName)
+      synthesizeVoice(ssml, audioFileName, voiceOptions)
           .then((timepoints) => {
             console.log('result timepoints: ' + JSON.stringify(timepoints));
             return generateSRT(subtitleFileName, ssml, timepoints);
