@@ -6,7 +6,7 @@ const {sound_api, sound_api_key, sound_api_data} = require('./constants');
 
 const router = express.Router();
 
-const generateSound = (prompt, lengthSec) => {
+const generateSound = (prompt, lengthSec = 70) => {
   sound_api_data.description = prompt;
   // This is currently ignored.
   sound_api_data.requestContext.audioLengthSeconds = lengthSec;

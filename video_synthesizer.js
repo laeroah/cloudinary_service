@@ -29,6 +29,14 @@ const tag = 'sample-story-video';
 
 const imageHeight = 904;
 const imageWidth = 512;
+const landscapeVideoDimention = {
+  width: 904,
+  height: 512
+};
+const portraitVideoDimention = {
+  width: 512,
+  height: 904
+};
 
 // Sample story data
 const sampleStoryName = 'sample_story_1'
@@ -116,23 +124,35 @@ const applyOverlayToImage = (overlayId, videoId) => {
   return url;
 };
 
-const concatVideos = (videoPublicIds) => {
-  const videoHeight = imageHeight;
-  const videoWidth = imageWidth;
-  const totalVideoCount = videoPublicIds.length;
-  var transformation = [{height: videoHeight, width: videoWidth, crop: 'fill'}];
-  for (let i = 1; i < totalVideoCount; i++) {
-    transformation.push(
-        {flags: 'splice', overlay: `video:${videoPublicIds[i]}`});
-    transformation.push(
-        {height: videoHeight, width: videoWidth, crop: 'fill'},
-        {flags: 'layer_apply'});
-  }
-  const url = cloudinary.url(
-      `${videoPublicIds[0]}.mp4`, {resource_type: 'video', transformation});
-  console.log('concat video: ' + url + '\n');
-  return url;
-};
+const concatVideos =
+    (videoPublicIds, orientation = 'portrait', durations = []) => {
+      const {videoWidth, videoHeight} = orientation == 'portrait' ?
+          portraitVideoDimention :
+          landscapeVideoDimention;
+      const totalVideoCount = videoPublicIds.length;
+      var transformation = durations && durations[0] ?
+          [{height: videoHeight, width: videoWidth, crop: 'fill'}] :
+          [{
+            height: videoHeight,
+            width: videoWidth,
+            crop: 'fill',
+            duration: durations[0]
+          }];
+      for (let i = 1; i < totalVideoCount; i++) {
+        transformation.push(
+            {flags: 'splice', overlay: `video:${videoPublicIds[i]}`});
+        if (durations && durations[i]) {
+          transformation.push({duration: durations[i]});
+        }
+        transformation.push(
+            {height: videoHeight, width: videoWidth, crop: 'fill'},
+            {flags: 'layer_apply'});
+      }
+      const url = cloudinary.url(
+          `${videoPublicIds[0]}.mp4`, {resource_type: 'video', transformation});
+      console.log('concat video: ' + url + '\n');
+      return url;
+    };
 
 const publicIdBase = (prefix) => {
   const nameBase = Date.now();
@@ -305,7 +325,9 @@ router.use('/video/concat', async (req, res, next) => {
     });
     Promise.all(uploadVideoPromises)
         .then(() => {
-          const videoUrl = concatVideos(videoPublicIds);
+          const durations = req.body.durations || [];
+          const orientation = req.body.orientation || 'portrait';
+          const videoUrl = concatVideos(videoPublicIds, orientation, durations);
           return saveDataToCloudStorage(videoUrl, gcsOutputVideoFolder);
         })
         .then(([url]) => {
@@ -369,7 +391,8 @@ router.use('/synthesize_video', async (req, res, next) => {
         })
         .then(() => {
           // create and upload concatnated video
-          const videoUrl = concatVideos(videoPublicIds);
+          const orientation = req.body.orientation || 'portrait';
+          const videoUrl = concatVideos(videoPublicIds, orientation);
           return uploadToCloudinary(videoUrl, concatVideoId, 'video');
         })
         .then(() => {
@@ -455,6 +478,7 @@ router.use('/video/sound', async (req, res, next) => {
     const duration = req.body.duration;
     const soundCloudinaryId = Date.now() + 'sound_file';
     const videoCloudinaryId = Date.now() + 'video_file';
+    const volume = req.body.volume || "-80";
     var uploads = [];
     uploads.push(
         uploadToCloudinary(soundUrl, soundCloudinaryId, resourceTypeAudio));
@@ -469,7 +493,7 @@ router.use('/video/sound', async (req, res, next) => {
                 public_id: soundCloudinaryId + '.mp3'
               }
             },
-            {effect: 'volume:-80'}
+            {effect: `volume:${volume}`}
           ];
           transformation.push({flags: 'layer_apply', duration, start_offset});
           const url = cloudinary.url(
