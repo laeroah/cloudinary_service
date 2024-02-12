@@ -103,7 +103,7 @@ const applyAnimationToImages = (imagePublicIds, animate_durations) => {
       resource_type: 'image',
       transformation: [
         {effect: `zoompan:${mode};du_${du};to_(g_auto);fps_30`},
-        {width: 400, crop: 'scale'}, {quality: 'auto'}
+        {crop: 'scale'}, {quality: 'auto'}
       ]
     }) + '.mp4';
     console.log('animated image url: ' + url + '\n');
