@@ -501,16 +501,12 @@ router.use('/video/sound', async (req, res, next) => {
                           videoCloudinaryId,
                           {resource_type: resourceTypeVideo, transformation}) +
               '.mp4';
-          return uploadToCloudinary(
-              url, resultVideoCloudinaryId, {resource_type: resourceTypeVideo});
+          return saveDataToCloudStorage(
+              url, gcsOutputVideoFolder);
         })
-        .then(() => {
-          const url = cloudinary.url(
-                          resultVideoCloudinaryId,
-                          {resource_type: resourceTypeVideo, transformation}) +
-              '.mp4';
-          console.log('url: ' + url + '\n');
-          res.status(200).send({message: 'success', url});
+        .then(([finalVideoUrl]) => {
+          console.log('url: ' + finalVideoUrl + '\n');
+          res.status(200).send({message: 'success', url: finalVideoUrl});
         })
         .catch(error => {
           console.error(error);
