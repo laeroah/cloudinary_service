@@ -478,7 +478,8 @@ router.use('/video/sound', async (req, res, next) => {
     const duration = req.body.duration;
     const soundCloudinaryId = Date.now() + 'sound_file';
     const videoCloudinaryId = Date.now() + 'video_file';
-    const volume = req.body.volume || "-80";
+    const resultVideoCloudinaryId = Date.now() + 'result_video_file';
+    const volume = req.body.volume || '-80';
     var uploads = [];
     uploads.push(
         uploadToCloudinary(soundUrl, soundCloudinaryId, resourceTypeAudio));
@@ -498,6 +499,14 @@ router.use('/video/sound', async (req, res, next) => {
           transformation.push({flags: 'layer_apply', duration, start_offset});
           const url = cloudinary.url(
                           videoCloudinaryId,
+                          {resource_type: resourceTypeVideo, transformation}) +
+              '.mp4';
+          return uploadToCloudinary(
+              url, resultVideoCloudinaryId, {resource_type: resourceTypeVideo});
+        })
+        .then(() => {
+          const url = cloudinary.url(
+                          resultVideoCloudinaryId,
                           {resource_type: resourceTypeVideo, transformation}) +
               '.mp4';
           console.log('url: ' + url + '\n');
