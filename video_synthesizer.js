@@ -515,7 +515,7 @@ router.use('/video/sound', async (req, res, next) => {
         .catch(error => {
           console.error(error);
           return res.status(500).send(
-              {message: 'Failed to add sound to video. Error: ' + error});
+              {message: 'Failed to add sound to video. Error: ' + JSON.stringify(error)});
         });
   } else {
     next();
