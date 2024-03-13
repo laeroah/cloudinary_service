@@ -11,7 +11,7 @@ const generateSignedUrl = async (fileName) => {
   const options = {
     version: 'v2',  // defaults to 'v2' if missing.
     action: 'read',
-    expires: Date.now() + 1000 * 60 * 60,  // one hour
+    expires: Date.now() + 1000 * 60 * 60 * 12,  // 12 hours
   };
 
   return storage.bucket(bucketName).file(fileName).getSignedUrl(options);
