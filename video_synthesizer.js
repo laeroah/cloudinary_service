@@ -479,7 +479,7 @@ router.use('/video/sound', async (req, res, next) => {
     const soundCloudinaryId = Date.now() + 'sound_file';
     const videoCloudinaryId = Date.now() + 'video_file';
     const resultVideoCloudinaryId = Date.now() + 'result_video_file';
-    const volume = req.body.volume || '-80';
+    const volume = req.body.volume || '-30';
     var uploads = [];
     uploads.push(
         uploadToCloudinary(soundUrl, soundCloudinaryId, resourceTypeAudio));
