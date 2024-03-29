@@ -518,4 +518,51 @@ router.use('/video/sound', async (req, res, next) => {
   }
 });
 
+// clang-format off
+/* Sample call:
+curl -X POST -H "Content-Type: application/json" --data \
+'{"video_url":url, "text_overlay": "Gif!!!"}' \
+http://0.0.0.0:8080/video/add_text_and_convert_to_gif
+*/
+// clang-format on
+router.use('/video/add_text_and_convert_to_gif', async (req, res, next) => {
+  if (req.method === 'POST') {
+    const videoUrl = req.body.video_url;
+    const textOverlay = req.body.text_overlay;
+    const videoCloudinaryId = Date.now() + 'video_file';
+    var uploads = [];
+    uploads.push(
+        uploadToCloudinary(videoUrl, videoCloudinaryId, resourceTypeVideo));
+    Promise.all(uploads)
+        .then(() => {
+          var transformation = [
+            {
+              color: "#FFFFFFFF",
+              overlay: {font_family: "bangers",
+              font_size: 75, font_weight: "bold",
+              letter_spacing: 6,
+              text: textOverlay}
+            },
+          ];
+          const url = cloudinary.url(
+                          videoCloudinaryId,
+                          {resource_type: resourceTypeVideo, transformation}) +
+              '.gif';
+          return saveDataToCloudStorage(
+              url, gcsOutputVideoFolder);
+        })
+        .then(([finalVideoUrl]) => {
+          console.log('url: ' + finalVideoUrl + '\n');
+          res.status(200).send({message: 'success', url: finalVideoUrl});
+        })
+        .catch(error => {
+          console.error(error);
+          return res.status(500).send(
+              {message: 'Failed to add sound to video. Error: ' + JSON.stringify(error)});
+        });
+  } else {
+    next();
+  }
+});
+
 module.exports = router;
