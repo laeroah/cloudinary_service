@@ -558,7 +558,7 @@ router.use('/video/add_text_and_convert_to_gif', async (req, res, next) => {
         })
         .then((resultGifUrls) => {
           console.log('url: ' + resultGifUrls + '\n');
-          res.status(200).send({message: 'success', result: resultGifUrls});
+          res.status(200).send({message: 'success', resultGifs: resultGifUrls});
         })
         .catch(error => {
           console.error(error);
