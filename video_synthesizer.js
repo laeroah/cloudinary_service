@@ -527,33 +527,38 @@ http://0.0.0.0:8080/video/add_text_and_convert_to_gif
 // clang-format on
 router.use('/video/add_text_and_convert_to_gif', async (req, res, next) => {
   if (req.method === 'POST') {
-    const videoUrl = req.body.video_url;
-    const textOverlay = req.body.text_overlay;
-    const videoCloudinaryId = Date.now() + 'video_file';
-    var uploads = [];
-    uploads.push(
-        uploadToCloudinary(videoUrl, videoCloudinaryId, resourceTypeVideo));
-    Promise.all(uploads)
+    const videoUrls = req.body.video_clip_urls;
+    const textOverlays = req.body.text_overlays;
+    let videoPublicIds = [];
+    const uploadVideoPromises = videoUrls.map((videoUrl, index) => {
+      const publicId = publicIdBase(`gif_${index}`);
+      videoPublicIds.push(publicId);
+      return uploadToCloudinary(videoUrl, publicId, resourceTypeVideo);
+    });
+    Promise.all(uploadVideoPromises)
         .then(() => {
-          var transformation = [
-            {
-              color: "#FFFFFFFF",
-              overlay: {font_family: "bangers",
-              font_size: 75, font_weight: "bold",
-              letter_spacing: 6,
-              text: textOverlay}
-            },
-          ];
-          const url = cloudinary.url(
-                          videoCloudinaryId,
-                          {resource_type: resourceTypeVideo, transformation}) +
-              '.gif';
-          return saveDataToCloudStorage(
-              url, gcsOutputVideoFolder);
+          const gcsSaves = videoPublicIds.map((videoCloudinaryId, index) => {
+            var transformation = [
+              {
+                color: "#FFFFFFFF",
+                overlay: {font_family: "bangers",
+                font_size: 75, font_weight: "bold",
+                letter_spacing: 6,
+                text: textOverlays[index]}
+              },
+            ];
+            const url = cloudinary.url(
+                            videoCloudinaryId,
+                            {resource_type: resourceTypeVideo, transformation}) +
+                '.gif';
+            return saveDataToCloudStorage(
+                url, gcsOutputVideoFolder);
+          })
+          return Promise.all(gcsSaves)
         })
-        .then(([finalVideoUrl]) => {
-          console.log('url: ' + finalVideoUrl + '\n');
-          res.status(200).send({message: 'success', url: finalVideoUrl});
+        .then((resultGifUrls) => {
+          console.log('url: ' + resultGifUrls + '\n');
+          res.status(200).send({message: 'success', result: resultGifUrls});
         })
         .catch(error => {
           console.error(error);
