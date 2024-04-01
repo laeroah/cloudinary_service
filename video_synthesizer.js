@@ -546,6 +546,7 @@ router.use('/video/add_text_and_convert_to_gif', async (req, res, next) => {
                 letter_spacing: 6,
                 text: textOverlays[index]}
               },
+              {effect: "loop"}
             ];
             const url = cloudinary.url(
                             videoCloudinaryId,
