@@ -521,7 +521,7 @@ router.use('/video/sound', async (req, res, next) => {
 // clang-format off
 /* Sample call:
 curl -X POST -H "Content-Type: application/json" \
---data '{"video_clip_urls":["https://res.cloudinary.com/dgxcndjdr/video/upload/v1711664702/concat_2_1711664701982.webm", "https://res.cloudinary.com/dgxcndjdr/video/upload/v1711662224/ohfcvzwoqcondzpdtupy.webm"], "top_text_overlays": ["t1111!!!", "t22222!!!"], "bottom_text_overlays": ["b1111!!!", "b22222!!!"]}' \
+--data '{"video_clip_urls":["https://res.cloudinary.com/dgxcndjdr/video/upload/v1711664702/concat_2_1711664701982.webm", "https://res.cloudinary.com/dgxcndjdr/video/upload/v1711662224/ohfcvzwoqcondzpdtupy.webm"], "top_text_overlays": ["t1111!!!", "t22222!!!"], "bottom_text_overlays": ["b1111!!!", "b22222!!!"], "acceleration": -100}' \
 http://0.0.0.0:8080/video/add_text_and_convert_to_gif
 */
 // clang-format on
@@ -530,6 +530,7 @@ router.use('/video/add_text_and_convert_to_gif', async (req, res, next) => {
     const videoUrls = req.body.video_clip_urls;
     const topTextOverlays = req.body.top_text_overlays;
     const bottomTextOverlays = req.body.bottom_text_overlays;
+    const acceleration = req.body.acceleration;
     let videoPublicIds = [];
     const uploadVideoPromises = videoUrls.map((videoUrl, index) => {
       const publicId = publicIdBase(`gif_${index}`);
@@ -540,6 +541,9 @@ router.use('/video/add_text_and_convert_to_gif', async (req, res, next) => {
         .then(() => {
           const gcsSaves = videoPublicIds.map((videoCloudinaryId, index) => {
             let transformation = [{effect: "loop"}]
+            if (acceleration && acceleration != 0) {
+              transformation.push({effect: `accelerate:${acceleration}`})
+            }
             if (topTextOverlays[index] !== null && topTextOverlays[index].length > 0) {
               transformation.push({
                 color: "#FFFFFFFF",
@@ -567,6 +571,7 @@ router.use('/video/add_text_and_convert_to_gif', async (req, res, next) => {
                             videoCloudinaryId,
                             {resource_type: resourceTypeVideo, transformation}) +
                 '.gif';
+            console.log(url)
             return saveDataToCloudStorage(
                 url, gcsOutputVideoFolder);
           })
