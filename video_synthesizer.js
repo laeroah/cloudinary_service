@@ -539,8 +539,9 @@ router.use('/video/add_text_and_convert_to_gif', async (req, res, next) => {
     Promise.all(uploadVideoPromises)
         .then(() => {
           const gcsSaves = videoPublicIds.map((videoCloudinaryId, index) => {
-            var transformation = [
-              (topTextOverlays[index] !== null && topTextOverlays[index].length > 0) && {
+            let transformation = [{effect: "loop"}]
+            if (topTextOverlays[index] !== null && topTextOverlays[index].length > 0) {
+              transformation.push({
                 color: "#FFFFFFFF",
                 overlay: {font_family: "impact",
                 font_size: 65, font_weight: "bold",
@@ -548,8 +549,10 @@ router.use('/video/add_text_and_convert_to_gif', async (req, res, next) => {
                 text: topTextOverlays[index]},
                 gravity: "north",
                 y: 20, // top margin
-              },
-              (bottomTextOverlays[index] !== null && bottomTextOverlays[index].length > 0) && {
+              })
+            }
+            if (bottomTextOverlays[index] !== null && bottomTextOverlays[index].length > 0) {
+              transformation.push({
                 color: "#FFFFFFFF",
                 overlay: {font_family: "impact",
                 font_size: 65, font_weight: "bold",
@@ -557,9 +560,9 @@ router.use('/video/add_text_and_convert_to_gif', async (req, res, next) => {
                 text: bottomTextOverlays[index]},
                 gravity: "south",
                 y: 20, // bottom margin
-              },
-              {effect: "loop"}
-            ];
+              })
+            }
+            console.log(JSON.stringify(transformation))
             const url = cloudinary.url(
                             videoCloudinaryId,
                             {resource_type: resourceTypeVideo, transformation}) +
