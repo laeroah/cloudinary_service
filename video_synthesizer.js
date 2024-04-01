@@ -540,7 +540,7 @@ router.use('/video/add_text_and_convert_to_gif', async (req, res, next) => {
         .then(() => {
           const gcsSaves = videoPublicIds.map((videoCloudinaryId, index) => {
             var transformation = [
-              topTextOverlays[index].length > 0 && {
+              (topTextOverlays[index] !== null && topTextOverlays[index].length > 0) && {
                 color: "#FFFFFFFF",
                 overlay: {font_family: "impact",
                 font_size: 65, font_weight: "bold",
@@ -549,7 +549,7 @@ router.use('/video/add_text_and_convert_to_gif', async (req, res, next) => {
                 gravity: "north",
                 y: 20, // top margin
               },
-              bottomTextOverlays[index].length > 0 && {
+              (bottomTextOverlays[index] !== null && bottomTextOverlays[index].length > 0) && {
                 color: "#FFFFFFFF",
                 overlay: {font_family: "impact",
                 font_size: 65, font_weight: "bold",
