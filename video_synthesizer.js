@@ -541,7 +541,7 @@ router.use('/video/add_text_and_convert_to_gif', async (req, res, next) => {
             var transformation = [
               {
                 color: "#FFFFFFFF",
-                overlay: {font_family: "bangers",
+                overlay: {font_family: "impact",
                 font_size: 75, font_weight: "bold",
                 letter_spacing: 6,
                 text: textOverlays[index]}
