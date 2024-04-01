@@ -520,15 +520,16 @@ router.use('/video/sound', async (req, res, next) => {
 
 // clang-format off
 /* Sample call:
-curl -X POST -H "Content-Type: application/json" --data \
-'{"video_url":url, "text_overlay": "Gif!!!"}' \
+curl -X POST -H "Content-Type: application/json" \
+--data '{"video_clip_urls":["https://res.cloudinary.com/dgxcndjdr/video/upload/v1711664702/concat_2_1711664701982.webm", "https://res.cloudinary.com/dgxcndjdr/video/upload/v1711662224/ohfcvzwoqcondzpdtupy.webm"], "top_text_overlays": ["t1111!!!", "t22222!!!"], "bottom_text_overlays": ["b1111!!!", "b22222!!!"]}' \
 http://0.0.0.0:8080/video/add_text_and_convert_to_gif
 */
 // clang-format on
 router.use('/video/add_text_and_convert_to_gif', async (req, res, next) => {
   if (req.method === 'POST') {
     const videoUrls = req.body.video_clip_urls;
-    const textOverlays = req.body.text_overlays;
+    const topTextOverlays = req.body.top_text_overlays;
+    const bottomTextOverlays = req.body.bottom_text_overlays;
     let videoPublicIds = [];
     const uploadVideoPromises = videoUrls.map((videoUrl, index) => {
       const publicId = publicIdBase(`gif_${index}`);
@@ -539,12 +540,23 @@ router.use('/video/add_text_and_convert_to_gif', async (req, res, next) => {
         .then(() => {
           const gcsSaves = videoPublicIds.map((videoCloudinaryId, index) => {
             var transformation = [
-              {
+              topTextOverlays[index].length > 0 && {
                 color: "#FFFFFFFF",
                 overlay: {font_family: "impact",
-                font_size: 75, font_weight: "bold",
+                font_size: 65, font_weight: "bold",
                 letter_spacing: 6,
-                text: textOverlays[index]}
+                text: topTextOverlays[index]},
+                gravity: "north",
+                y: 20, // top margin
+              },
+              bottomTextOverlays[index].length > 0 && {
+                color: "#FFFFFFFF",
+                overlay: {font_family: "impact",
+                font_size: 65, font_weight: "bold",
+                letter_spacing: 6,
+                text: bottomTextOverlays[index]},
+                gravity: "south",
+                y: 20, // bottom margin
               },
               {effect: "loop"}
             ];
